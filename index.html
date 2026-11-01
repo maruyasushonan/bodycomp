@@ -3711,9 +3711,9 @@ function launchConfetti() {
 </style>
 <script>
 // BodyComp v2: 2026-11-01から6日循環。原型と実績は別データで保持。
-const BC_START='2026-11-01';
-const BC_PARTS=['胸','背中','肩','脚','腕','腹筋'];
-const BC_SOURCE='Shuru 6分割法・動画文字起こし（本人の負荷であり利用者の処方値ではありません）';
+const BC_START='2026-11-02';
+const BC_PARTS=['胸','脚','背中','腹筋','肩','腕','休養'];
+const BC_SOURCE='月:胸／火:脚／水:背中／木:腹筋／金:肩／土:腕／日:休養。種目はShuru参考（重量は本人の処方ではありません）';
 const BC_PLAN=[
 [{n:'インクラインベンチプレス',sets:7,reps:'106kg×4〜5回×2 / 86kg×8〜10回×3 / 56kg×限界×2',rest:'120秒（最後60秒）',extra:'準備：56kg×12回×2'},
  {n:'リバースグリップ・インクラインベンチ',sets:3,reps:'45kg×13回',rest:'90秒'},
@@ -3748,7 +3748,8 @@ const BC_PLAN=[
 ];
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
 // 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
-const bcExerciseIndex=new Map(BC_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
+const BC_WEEKLY_PLAN=[BC_PLAN[0],BC_PLAN[3],BC_PLAN[1],BC_PLAN[5],BC_PLAN[2],BC_PLAN[4],[]];
+const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
 if(bcMigrated) save();
@@ -3806,20 +3807,20 @@ function bcDpCard(name,id,date){
 
 let bcViewDate=TODAY;
 let bcGraphs=[];
-function bcIndex(date){const a=Date.parse(BC_START+'T12:00:00'),b=Date.parse(date+'T12:00:00');return ((Math.round((b-a)/86400000)%6)+6)%6;}
+function bcIndex(date){return (new Date(date+'T12:00:00').getDay()+6)%7;}
 function bcDateOffset(date,n){let d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function bcDay(date){return BC_PARTS[bcIndex(date)];}
 function bcEscape(str){return String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 function bcGuide(){
  const root=document.getElementById('bc-mobile-guide');if(!root)return;
- const idx=bcIndex(bcViewDate),date=bcViewDate,part=BC_PARTS[idx],items=BC_PLAN[idx],isToday=date===TODAY;
+ const idx=bcIndex(bcViewDate),date=bcViewDate,part=BC_PARTS[idx],items=BC_WEEKLY_PLAN[idx],isToday=date===TODAY;
  const estimated=items.reduce((n,x)=>n+bcDpConfig(x.n).sets,0);
- let html=`<div class="bc-hero"><div class="k">${isToday?'今日のトレーニング':'予定メニュー'} · DAY ${idx+1} / 6 · ${date}</div><div class="name">${bcEscape(part)}</div><div class="meta">${items.length}種目 ／ 目標約${estimated}セット　·　重量・回数は自分用設定を優先</div></div>`;
+ let html=`<div class="bc-hero"><div class="k">${isToday?'今日のトレーニング':'予定メニュー'} · ${idx===6?'休養日':'DAY '+(idx+1)+' / 6'} · ${date}</div><div class="name">${bcEscape(part)}</div><div class="meta">${items.length}種目 ／ 目標約${estimated}セット　·　重量・回数は自分用設定を優先</div></div>`;
  html+=`<div style="margin:8px 0 12px"><button class="bc-smallbtn" onclick="bcImportPcWeights()">↻ PCで保存した初期重量を読み込む</button><div class="bc-note" style="margin-top:5px">PCで重量を保存して同期が完了した後、スマホで1回押してください。既存の記録は消去しません。</div></div>`;
- html+=`<div class="bc-guide-title">上から順番に実施するメニュー</div>`;
- if((idx===0||idx===2))html+=`<div class="bc-safety">⚠ 肩に痛みが出る種目は行わず、痛みのない代替種目に変更してください。</div>`;
- if(idx===5)html+=`<div class="bc-safety">⚠ ドラゴンフラッグ後の強い腹痛があったため、再実施は症状の消失を確認してから判断してください。</div>`;
+ html+=`<div class="bc-guide-title">${idx===6?'日曜日は休養日です':'上から順番に実施するメニュー'}</div>`;
+ if((idx===0||idx===4))html+=`<div class="bc-safety">⚠ 肩に痛みが出る種目は行わず、痛みのない代替種目に変更してください。</div>`;
+ if(idx===3)html+=`<div class="bc-safety">⚠ ドラゴンフラッグ後の強い腹痛があったため、再実施は症状の消失を確認してから判断してください。</div>`;
  items.forEach((e,i)=>{
   const c=bcDpConfig(e.n),previous=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<date).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0))[0];
   const custom=DB.trainingSettings.progression[e.n];
@@ -3832,29 +3833,29 @@ function bcGuide(){
  root.innerHTML=html;
 }
 function bcDraw(){
- const idx=bcIndex(bcViewDate),items=BC_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
+ const idx=bcIndex(bcViewDate),items=BC_WEEKLY_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
  const today=bcViewDate===TODAY;
  let html=`<div style="background:var(--surface2);padding:12px;border-radius:12px;margin-bottom:12px;"><b>筋力基準（1RM）</b><div class="bc-note">1回だけ挙上できる限度。参考値はベンチ105kg、スクワット120〜125kg、デッドリフト130〜135kg。以下は代表値で編集可能。デッドリフトは現行6分割には未追加。</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px;">${BC_STRENGTH.map(t=>`<label style="font-size:10px;">${t.name}<input id="bc-max-${t.key}" type="number" step="0.5" min="1" value="${DB.trainingSettings.strengthMax[t.key]}" style="width:100%;min-width:0;padding:6px;"><button class="bc-smallbtn" style="margin-top:5px;" onclick="bcSaveMax('${t.key}')">保存</button></label>`).join('')}</div></div>`;
  html+=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
- html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">D${i+1}<br>${p}</button>`).join('')}</div>`;
+ html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">${i===6?'日':'D'+(i+1)}<br>${p}</button>`).join('')}</div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
- if(idx===0||idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
- if(idx===5)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 過去にドラゴンフラッグ後の強い腹痛があったため、回復と症状を確認してから再開を判断してください。</div>`;
+ if(idx===0||idx===4)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
+ if(idx===3)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 過去にドラゴンフラッグ後の強い腹痛があったため、回復と症状を確認してから再開を判断してください。</div>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exerciseId===id);const last=DB.trainingLogs.filter(x=>x.exerciseId===id&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
  html+=`<div class="bc-ex"><div class="bc-ex-head">${i+1}. ${bcEscape(e.n)}</div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
- if(today)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
+ if(today&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(today)html+=`<button class="bc-smallbtn" style="width:100%;margin-top:10px" onclick="bcFinish()">本日のトレーニングを完了</button>`;
  html+=`<div class="bc-note" style="margin-top:12px">重量は実際に使用した器具の合計値を入力。自重種目は0kg。RIRは限界までの残り回数、痛みは0〜10。記録は既存のBodyCompデータとして保存されます。</div>`;
  root.innerHTML=html;
  bcGuide();
 }
-function bcChoose(idx){const delta=(idx-bcIndex(TODAY)+6)%6;bcViewDate=bcDateOffset(TODAY,delta);bcDraw();}
-function bcAdd(id){const w=document.getElementById('bc-w-'+id),r=document.getElementById('bc-r-'+id),i=document.getElementById('bc-i-'+id),p=document.getElementById('bc-p-'+id);let weight=Number(w.value),reps=Number(r.value),rir=Number(i.value),pain=Number(p.value);if(!w.value||!r.value||weight<0||!Number.isInteger(reps)||reps<1||rir<0||rir>10||pain<0||pain>10){alert('重量、回数、RIR（0〜10）、痛み（0〜10）を正しく入力してください');return;}DB.trainingLogs.push({date:TODAY,exerciseId:id,exercise:BC_PLAN[bcIndex(TODAY)][Number(id.split('-')[1])].n,part:bcDay(TODAY),weight,reps,rir,pain,ts:Date.now()});save();bcDraw();renderVol();}
-function bcFinish(){const num=bcCount(TODAY);if(!num){alert('少なくとも1セットの記録が必要です');return;}DB.workouts=DB.workouts.filter(x=>x.date!==TODAY);DB.workouts.push({date:TODAY,type:'self',dur:0,note:`6分割 ${bcDay(TODAY)} / ${num}セット`,part:bcDay(TODAY),sets:num});save();renderWeek();renderWklist();renderToday();bcDraw();alert('本日のトレーニングを記録しました');}
+function bcChoose(idx){const delta=(idx-bcIndex(TODAY)+7)%7;bcViewDate=bcDateOffset(TODAY,delta);bcDraw();}
+function bcAdd(id){if(bcIndex(TODAY)===6){alert('日曜日は休養日です');return;}const w=document.getElementById('bc-w-'+id),r=document.getElementById('bc-r-'+id),i=document.getElementById('bc-i-'+id),p=document.getElementById('bc-p-'+id);let weight=Number(w.value),reps=Number(r.value),rir=Number(i.value),pain=Number(p.value);if(!w.value||!r.value||weight<0||!Number.isInteger(reps)||reps<1||rir<0||rir>10||pain<0||pain>10){alert('重量、回数、RIR（0〜10）、痛み（0〜10）を正しく入力してください');return;}DB.trainingLogs.push({date:TODAY,exerciseId:id,exercise:BC_WEEKLY_PLAN[bcIndex(TODAY)][Number(id.split('-')[1])].n,part:bcDay(TODAY),weight,reps,rir,pain,ts:Date.now()});save();bcDraw();renderVol();}
+function bcFinish(){if(bcIndex(TODAY)===6){alert('日曜日は休養日です');return;}const num=bcCount(TODAY);if(!num){alert('少なくとも1セットの記録が必要です');return;}DB.workouts=DB.workouts.filter(x=>x.date!==TODAY);DB.workouts.push({date:TODAY,type:'self',dur:0,note:`6分割 ${bcDay(TODAY)} / ${num}セット`,part:bcDay(TODAY),sets:num});save();renderWeek();renderWklist();renderToday();bcDraw();alert('本日のトレーニングを記録しました');}
 renderWeek=function(){const root=document.getElementById('wgrid');if(!root)return;const d=new Date(TODAY+'T12:00:00');let weekday=(d.getDay()+6)%7,mon=bcDateOffset(TODAY,-weekday);root.innerHTML=Array.from({length:7},(_,i)=>{const ds=bcDateOffset(mon,i),part=bcDay(ds),saved=bcCount(ds)>0;return `<div class="day ${ds===TODAY?'today':''} ${saved?'self':''}" onclick="bcViewDate='${ds}';bcDraw()"><div class="dname">${'月火水木金土日'[i]}</div><div class="dnum">${Number(ds.slice(-2))}</div><div class="dplan-lbl" style="font-size:10px">${part}</div>${saved?'<div class="ddot" style="background:var(--green)"></div>':''}</div>`;}).join('');};
 showDayPlan=function(idx){const d=new Date(TODAY+'T12:00:00');bcViewDate=bcDateOffset(TODAY,idx-(d.getDay()+6)%7);bcDraw();};
-getTodayProg=function(){return {label:`Day ${bcIndex(TODAY)+1}｜${bcDay(TODAY)}`,type:'self',blocks:[{exercises:BC_PLAN[bcIndex(TODAY)].map((e,i)=>({id:bcIndex(TODAY)+'-'+i,name:e.n,sets:String(e.sets)}))}]};};
+getTodayProg=function(){const idx=bcIndex(TODAY);return {label:idx===6?'日曜日｜休養':`Day ${idx+1}｜${bcDay(TODAY)}`,type:idx===6?'rest':'self',blocks:[{exercises:BC_WEEKLY_PLAN[idx].map((e,i)=>({id:idx+'-'+i,name:e.n,sets:String(e.sets)}))}]};};
 renderProgram=function(){bcViewDate=TODAY;bcDraw();};
 renderVol=function(){const root=document.getElementById('volC');if(!root||typeof Chart==='undefined')return;if(vChart)vChart.destroy();let days=Array.from({length:7},(_,i)=>bcDateOffset(TODAY,-i));const counts=BC_PARTS.map(p=>DB.trainingLogs.filter(x=>days.includes(x.date)&&x.part===p).length);vChart=new Chart(root,{type:'bar',data:{labels:BC_PARTS,datasets:[{data:counts,backgroundColor:'#007aff88',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});};
 function bcTrendCharts(){const root=document.getElementById('three-trends');if(!root||typeof Chart==='undefined')return;bcGraphs.forEach(c=>c.destroy());bcGraphs=[];const specs=[['fat','体脂肪率','%','#ff3b30'],['weight','体重','kg','#ff9500'],['muscle','骨格筋量','kg','#34c759']];root.innerHTML=specs.map(([k,name,u])=>`<div class="bc-trendbox"><div class="bc-trendtitle">${name}（${u}）</div><div class="cwrap" style="height:155px"><canvas id="bc-trend-${k}"></canvas></div></div>`).join('');specs.forEach(([k,name,u,color])=>{const ms=DB.measurements||[];bcGraphs.push(new Chart(document.getElementById('bc-trend-'+k),{type:'line',data:{labels:ms.map(x=>fd(x.date)),datasets:[{data:ms.map(x=>x[k]),borderColor:color,backgroundColor:color+'22',fill:true,tension:.25,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:6}},y:{ticks:{maxTicksLimit:5}}}}}));});}
