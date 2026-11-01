@@ -3772,7 +3772,12 @@ const BC_LEGS_REVISED=[
  {n:'レッグカール（マシン重量）',sets:3,reps:'20kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'マシンの表示重量20kgは仮設定。機種差が大きいため初回に負荷を再調整'},
  {n:'カーフプレス（マシン重量）',sets:2,reps:'40kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'レッグプレス／カーフプレス使用。表示40kgは仮設定で、マシン機構に応じて調整'}
 ];
-const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_PLAN[5],BC_PLAN[2],BC_PLAN[4],[]];
+const BC_ABS_REVISED=[
+ {n:'アブドミナルクランチ（マシン重量）',sets:3,reps:'表示15kg（暫定）×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'体幹屈曲を丁寧に。マシン初回は軽量から確認し表示重量を調整'},
+ {n:'アブローラー（膝コロ）',sets:2,reps:'自重×6〜10回・可動域を短く開始',rest:'120秒',extra:'以前の強い腹痛が完全に解消している場合のみ。腰を反らさず痛みが出る前に停止'},
+ {n:'パロフプレス（ケーブル重量）',sets:1,reps:'表示5kg（暫定）×10〜12回／側・RIR2〜3',rest:'60〜90秒',extra:'左右各1セット。肩に痛みがあれば省略、ケーブルの負荷は実機で調整'}
+];
+const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_PLAN[2],BC_PLAN[4],[]];
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
@@ -3790,6 +3795,9 @@ const BC_DEFAULT_DP={
  'プレートロード・シーテッドロー':{min:8,max:12,sets:3,step:2.5,rir:2,weight:10,mode:'weight'},
  'ワンハンドダンベルロウ（片手重量）':{min:8,max:12,sets:3,step:2,rir:2,weight:20,mode:'weight'},
  'ラットプルダウン（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:2,weight:35,mode:'weight'},
+ 'アブドミナルクランチ（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:15,mode:'weight'},
+ 'アブローラー（膝コロ）':{min:6,max:10,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
+ 'パロフプレス（ケーブル重量）':{min:10,max:12,sets:1,step:1,rir:3,weight:5,mode:'weight'},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
  'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
  'レッグカール（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
@@ -3799,7 +3807,7 @@ const BC_DEFAULT_DP={
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
 };
 const BC_MACHINE_NAMES=new Set(['ケーブルプレスダウン','ワンハンドケーブルプル']);
-const BC_BODYWEIGHT_NAMES=new Set(['ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
+const BC_BODYWEIGHT_NAMES=new Set(['アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
  try{
@@ -3858,7 +3866,7 @@ function bcGuide(){
  if(idx===2)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">② ロウイングの器具を選択</b><div class="bc-note" style="margin:5px 0 9px">どちらか一方だけ3セット実施。重量設定は器具別に独立管理します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.backRowChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackRow('machine')">プレートロード</button><button class="bc-smallbtn" style="${DB.trainingSettings?.backRowChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackRow('dumbbell')">ダンベル</button></div></div>`;
  html+=`<div class="bc-guide-title">${idx===6?'日曜日は休養日です':'上から順番に実施するメニュー'}</div>`;
  if((idx===0||idx===4))html+=`<div class="bc-safety">⚠ 肩に痛みが出る種目は行わず、痛みのない代替種目に変更してください。</div>`;
- if(idx===3)html+=`<div class="bc-safety">⚠ ドラゴンフラッグ後の強い腹痛があったため、再実施は症状の消失を確認してから判断してください。</div>`;
+ if(idx===3)html+=`<div class="bc-safety">⚠ 過去にドラゴンフラッグ後の強い腹痛がありました。腹痛が完全に消失していない場合は腹筋運動を再開せず、症状が続く場合は医療機関に相談してください。</div>`;
  items.forEach((e,i)=>{
   const c=bcDpConfig(e.n),previous=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<date).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0))[0];
   const custom=DB.trainingSettings.progression[e.n];
