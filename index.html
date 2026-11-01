@@ -788,6 +788,8 @@ async function syncPull(){
     DB._ts=Math.max(DB._ts||0,rem._ts||0);
     localStorage.setItem('bc_db',JSON.stringify(DB));
     refreshMetrics?.();
+    // Remote training settings may have changed: redraw the current workout cards.
+    if (typeof bcDraw === 'function') bcDraw();
     setSyncDot('ok');
   }catch(e){ setSyncDot('err'); }
 }
