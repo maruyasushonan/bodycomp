@@ -3753,7 +3753,13 @@ const BC_CHEST_REVISED=[
  {n:'低角度インクラインダンベルプレス（片手重量）',sets:2,reps:'15〜30度・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。軽量から確認しRIR2〜3を優先'},
  {n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン依存・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'水平内転痛の既往あり。痛む場合は省略'}
 ];
-const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_PLAN[3],BC_PLAN[1],BC_PLAN[5],BC_PLAN[2],BC_PLAN[4],[]];
+const BC_LEGS_REVISED=[
+ {n:'スクワット',sets:3,reps:'87.5kg × 6〜10回・RIR2〜3',rest:'180〜240秒',extra:'初期重量87.5kgは1RM 120〜125kgを参考。動作が不安定なら減量'},
+ {n:'ブルガリアンスクワット（片手重量）',sets:2,reps:'片手10kg × 8〜12回／脚・RIR2〜3',rest:'120〜180秒',extra:'暫定開始重量。左右各2セット、片手10kgずつ（合計20kg）。フォーム優先'},
+ {n:'レッグカール（マシン重量）',sets:3,reps:'20kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'マシンの表示重量20kgは仮設定。機種差が大きいため初回に負荷を再調整'},
+ {n:'カーフプレス（マシン重量）',sets:2,reps:'40kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'レッグプレス／カーフプレス使用。表示40kgは仮設定で、マシン機構に応じて調整'}
+];
+const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_PLAN[1],BC_PLAN[5],BC_PLAN[2],BC_PLAN[4],[]];
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
@@ -3767,7 +3773,10 @@ const BC_DEFAULT_DP={
  'バーベルベンチプレス':{min:5,max:8,sets:3,step:2.5,rir:2,weight:80},
  '低角度インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
  'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
- 'スクワット':{min:8,max:12,sets:3,step:2.5,rir:2,weight:87.5},
+ 'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
+ 'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
+ 'レッグカール（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
+ 'カーフプレス（マシン重量）':{min:10,max:15,sets:2,step:5,rir:2,weight:40,mode:'weight'},
  'インクラインベンチプレス':{min:8,max:12,sets:3,step:2.5,rir:2,weight:null},
  'ノーマル懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0},
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
