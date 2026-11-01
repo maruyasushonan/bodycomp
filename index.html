@@ -433,14 +433,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(90,200,250,.3);vertical-align:middle;margin-right:4px;"></span>Zone 2</span>
       </div>
     </div>
-    <div class="card">
+    <details class="card" style="padding:14px 16px;">
+      <summary style="font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);">詳細設定・ノートからの記録転記（必要なときだけ開く）</summary>
+      <div style="height:12px;"></div>
       <div class="card-title">種目一覧・詳細設定</div>
       <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(0,122,255,.08);margin-bottom:12px;">
         <span style="font-size:16px;">🎯</span>
         <span style="font-size:12px;font-weight:600;color:var(--blue);line-height:1.5;">扱える重量・レップ数が前回から落ちていないか——毎回追い込む必要はなく、これだけが唯一のチェックポイント</span>
       </div>
       <div id="prog-card-inner"></div>
-    </div>
+    </details>
     <div class="card">
       <div class="card-title">実績セット数（直近7日）</div>
       <div class="cwrap" style="height:170px;"><canvas id="volC"></canvas></div>
