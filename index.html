@@ -3749,13 +3749,13 @@ const BC_PLAN=[
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
 // 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
 const BC_CHEST_INCLINE_DB={n:'低角度インクラインダンベルプレス（片手重量）',sets:2,reps:'15〜30度・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。片手重量を記録しRIR2〜3を優先'};
-const BC_CHEST_INCLINE_MACHINE={n:'プレートロード・インクラインプレス',sets:2,reps:'8〜12回・マシン固有の重量で設定',rest:'120〜150秒',extra:'無痛の軌道・可動域で実施。マシンの表示重量はダンベル重量と別管理'};
+const BC_CHEST_INCLINE_MACHINE={n:'プレートロード・インクラインプレス',sets:2,reps:'片側プレート10kg（暫定）・8〜12回',rest:'120〜150秒',extra:'初期重量は片側に載せるプレート重量（マシン自重は含まない）。空の状態から確認し、痛みなし・RIR3で調整'};
 function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='machine'?BC_CHEST_INCLINE_MACHINE:BC_CHEST_INCLINE_DB;}
 function bcSetChestIncline(choice){if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
 const BC_CHEST_REVISED=[
  {n:'バーベルベンチプレス',sets:3,reps:'80kg × 5〜8回 × 3セット / RIR2目安',rest:'180秒',extra:'実績：80kg×5回を3セット、最終セットも余力あり・痛みなし。翌日の肩症状が増える場合は減量'},
  bcChestIncline(),
- {n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン依存・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'水平内転痛の既往あり。痛む場合は省略'}
+ {n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン表示15kg（暫定）・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'肩の水平内転痛の既往あり。軽い設定から確認し、痛む場合は省略。マシン表示重量は実機で調整'}
 ];
 const BC_LEGS_REVISED=[
  {n:'スクワット',sets:3,reps:'87.5kg × 6〜10回・RIR2〜3',rest:'180〜240秒',extra:'初期重量87.5kgは1RM 120〜125kgを参考。動作が不安定なら減量'},
@@ -3776,8 +3776,8 @@ const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key
 const BC_DEFAULT_DP={
  'バーベルベンチプレス':{min:5,max:8,sets:3,step:2.5,rir:2,weight:80},
  '低角度インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
- 'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
- 'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
+ 'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
+ 'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
  'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
  'レッグカール（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
@@ -3786,7 +3786,7 @@ const BC_DEFAULT_DP={
  'ノーマル懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0},
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
 };
-const BC_MACHINE_NAMES=new Set(['プレートロード・インクラインプレス','ペックデック（無痛時のみ）','ケーブルプレスダウン','ワンハンドケーブルプル']);
+const BC_MACHINE_NAMES=new Set(['ケーブルプレスダウン','ワンハンドケーブルプル']);
 const BC_BODYWEIGHT_NAMES=new Set(['ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
