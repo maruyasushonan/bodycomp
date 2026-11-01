@@ -3641,7 +3641,7 @@ function launchConfetti() {
 <script>
 // BodyComp v2: 2026-11-01から6日循環。原型と実績は別データで保持。
 const BC_START='2026-11-01';
-const BC_PARTS=['胸','背中','脚','腕','肩','腹筋'];
+const BC_PARTS=['胸','背中','肩','脚','腕','腹筋'];
 const BC_SOURCE='Shuru 6分割法・動画文字起こし（本人の負荷であり利用者の処方値ではありません）';
 const BC_PLAN=[
 [{n:'インクラインベンチプレス',sets:7,reps:'106kg×4〜5回×2 / 86kg×8〜10回×3 / 56kg×限界×2',rest:'120秒（最後60秒）',extra:'準備：56kg×12回×2'},
@@ -3655,6 +3655,13 @@ const BC_PLAN=[
  {n:'ジーザス懸垂',sets:3,reps:'自重×5〜6回（ホールドに変更する日あり）',rest:'90秒'},
  {n:'ベントオーバーロウ',sets:3,reps:'56kg×12回×2、調子が良ければ86kg×10回×1〜2',rest:'120秒',extra:'本番は計3〜4セットの変動あり'},
  {n:'ワンハンドダンベルロウ',sets:3,reps:'40kg×左右13回',rest:'120秒'}],
+[{n:'サイドレイズ',sets:4,reps:'13kg×15回',rest:'90秒',extra:'軽い準備セットあり'},
+ {n:'シュラッグ',sets:3,reps:'40kg×20回',rest:'90秒'},
+ {n:'スリーピングサイドレイズ',sets:3,reps:'約10kg×10回',rest:'90秒'},
+ {n:'スリーピングリア',sets:3,reps:'約10kg×10回',rest:'90秒'},
+ {n:'羽たき（本人の呼称）',sets:3,reps:'13kg×13回（後半は1〜2kg減量）',rest:'90秒'},
+ {n:'元気玉（オーバーヘッドプレス系）',sets:3,reps:'25kg×12回',rest:'120秒'},
+ {n:'フロントレイズ',sets:3,reps:'20kg×10回',rest:'90秒'}],
 [{n:'スクワット',sets:3,reps:'86kg×20回×3',rest:'120秒',extra:'準備：56kg×12回×2'},
  {n:'ブルガリアンスクワット',sets:3,reps:'片手約20kg×12回',rest:'120秒'},
  {n:'ノルディックハムカール',sets:3,reps:'自重・手の補助あり×10回',rest:'120秒'}],
@@ -3663,19 +3670,17 @@ const BC_PLAN=[
  {n:'ワンハンドダンベルカール',sets:3,reps:'10回前後で限界になる重量',rest:'90秒'},
  {n:'ケーブルプレスダウン',sets:4,reps:'30kg×15回',rest:'90秒'},
  {n:'ワンハンドケーブルプル',sets:3,reps:'12kg×12回',rest:'90秒'}],
-[{n:'サイドレイズ',sets:4,reps:'13kg×15回',rest:'90秒',extra:'軽い準備セットあり'},
- {n:'シュラッグ',sets:3,reps:'40kg×20回',rest:'90秒'},
- {n:'スリーピングサイドレイズ',sets:3,reps:'約10kg×10回',rest:'90秒'},
- {n:'スリーピングリア',sets:3,reps:'約10kg×10回',rest:'90秒'},
- {n:'羽たき（本人の呼称）',sets:3,reps:'13kg×13回（後半は1〜2kg減量）',rest:'90秒'},
- {n:'元気玉（オーバーヘッドプレス系）',sets:3,reps:'25kg×12回',rest:'120秒'},
- {n:'フロントレイズ',sets:3,reps:'20kg×10回',rest:'90秒'}],
 [{n:'デクラインクランチEX',sets:4,reps:'15kg×12回',rest:'120秒'},
  {n:'アブローラー',sets:3,reps:'立ちコロ10回（限界時は膝コロ）',rest:'120秒'},
  {n:'ドラゴンフラッグ',sets:3,reps:'自重×6〜7回',rest:'120秒'},
  {n:'サイドプル',sets:3,reps:'40kg×左右15回',rest:'120秒'}]
 ];
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
+// 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
+const bcExerciseIndex=new Map(BC_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
+let bcMigrated=false;
+DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
+if(bcMigrated) save();
 if(!DB.trainingSettings) DB.trainingSettings={};
 let bcViewDate=TODAY;
 let bcGraphs=[];
@@ -3690,7 +3695,7 @@ function bcDraw(){
  let html=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">D${i+1}<br>${p}</button>`).join('')}</div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
- if(idx===0||idx===4)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
+ if(idx===0||idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
  if(idx===5)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 過去にドラゴンフラッグ後の強い腹痛があったため、回復と症状を確認してから再開を判断してください。</div>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exerciseId===id);const last=DB.trainingLogs.filter(x=>x.exerciseId===id&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
  html+=`<div class="bc-ex"><div class="bc-ex-head">${i+1}. ${bcEscape(e.n)}</div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
