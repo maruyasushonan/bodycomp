@@ -458,8 +458,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
   <div id="sc-food" class="screen">
     <div class="seg-ctrl">
       <button id="tab-today" class="seg-btn active" onclick="switchFoodTab('today')">📊 今日</button>
-      <button id="tab-menu"  class="seg-btn" onclick="switchFoodTab('menu')">🍽 メニュー</button>
-      <button id="tab-shop"  class="seg-btn" onclick="switchFoodTab('shop')">🛒 買い物</button>
+      <button id="tab-menu"  class="seg-btn" onclick="switchFoodTab('menu')">🍽 献立（旧案）</button>
+      <button id="tab-shop"  class="seg-btn" onclick="switchFoodTab('shop')">🛒 買い物（旧案）</button>
       <button id="tab-shuru" class="seg-btn" onclick="switchFoodTab('shuru')">📋 Shuru参考</button>
     </div>
 
@@ -470,7 +470,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
           <div class="card-title" style="margin-bottom:0;">今日の栄養</div>
           <div id="train-day-badge" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;"></div>
         </div>
-        <div id="nutr-summary"></div>
+        <div style="background:var(--surface2);border-radius:12px;padding:13px;margin-bottom:13px;"><div style="font-size:11px;color:var(--text3);">毎日の固定目標 · 6分割トレーニング</div><div style="font-size:26px;font-weight:800;margin:4px 0;">2,197 <span style="font-size:13px;font-weight:500;">kcal</span></div><div style="display:flex;justify-content:space-between;gap:7px;font-size:13px;font-weight:700;"><span>P 160g</span><span>F 45g</span><span>C 288g</span></div><div style="font-size:11px;color:var(--text3);margin-top:7px;">糖質288gにはトレーニング中のマルトデキストリン20gを含みます。</div></div><div id="nutr-summary"></div><button class="bc-smallbtn" style="width:100%;margin:0 0 12px;" onclick="quickAddPresetByName('マルトデキストリン20g（トレーニング中）')">＋ マルトデキストリン20gを今日の食事に追加（80kcal）</button>
         <div id="macro-bars" style="display:none;border-top:0.5px solid var(--surface2);padding-top:14px;margin-top:8px;"></div>
       </div>
       <div class="card">
@@ -494,7 +494,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </div>
 
     <!-- メニュービュー -->
-    <div id="view-menu" style="display:none;">
+    <div id="view-menu" style="display:none;"><div class="card" style="font-size:12px;line-height:1.6;color:var(--text2);">⚠ 現在の献立は旧PFC・休養日の区分を含む過去の参考案です。新しい毎日共通目標 P160 / F45 / C288 に合わせた献立への更新は未実施です。</div>
       <div class="card">
         <div id="rot-banner-wrap"></div>
         <div style="border-top:0.5px solid var(--border);margin-top:8px;padding-top:10px;">
@@ -549,7 +549,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </div>
 
     <!-- 買い物リストビュー -->
-    <div id="view-shop" style="display:none;">
+    <div id="view-shop" style="display:none;"><div class="card" style="font-size:12px;line-height:1.6;color:var(--text2);">⚠ この買い物リストは旧献立に基づく参考情報です。毎日共通の新PFC目標に合わせた数量への再計算は未実施です。</div>
       <div class="card">
         <div class="card-title" style="margin-bottom:4px;">🛒 週間買い物リスト（固定ローテ・7日分）</div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">日曜のまとめ仕込み用。数量は固定ローテ（おにぎり28個・鶏7枚・スープ7食・タレ7食）と朝食・間食・トレ日追加分の合計です</div>
@@ -1130,10 +1130,11 @@ const DAY_NAMES = ['日','月','火','水','木','金','土'];
 const TRAIN_DAYS = [2, 3, 5]; // 火=2(筋トレ全身A), 水=3(Zone2・4×4は維持期まで休止), 金=5(筋トレ全身B)
 const todayDow = new Date(TODAY+'T00:00:00').getDay();
 const IS_TRAIN = true; // 6日サイクルでは毎日トレーニング日
-const CAL_TGT  = IS_TRAIN ? 2200 : 1850;
+const CAL_TGT  = 2197; // 160g protein + 45g fat + 288g carbs
 const PROT_TGT = 160;
 
 const PRESETS = [
+  {name:'マルトデキストリン20g（トレーニング中）',cal:80,prot:0,fat:0,carbs:20,emoji:'🥤',cat:'追加',recipe:'トレーニング中の水に混ぜる糖質20g。1日C288gに含めて管理。飲んだ日にのみ追加。'},
   // macro: cal prot fat carbs fiber na(mg) | micro: ca mg2 k fe cu vitE(mg) | vit: satFat(g) vitA(mcgRAE) vitB1 vitB2 vitC(mg) zn vitD(mcg) vitB6(mg)
   {name:'ナイトオーツ（朝食）',          cal:470,prot:32,fat:12,carbs:70,fiber:11,na:250, ca:132,mg2:171,k:836, fe:4.9,cu:0.34,vitE:2.1, satFat:1.6,vitA:310,vitB1:0.54,vitB2:0.47,vitC:50,zn:1.7,vitD:2.0,vitB6:0.92,vitB12:0.3,folate:57, emoji:'🌾',cat:'朝食',
    recipe:'オートミール 50g・ソイプロテイン 1スクープ（20g）・チアシード 15g・バナナ 1本｜豆乳 or 水 150ml を前夜に混ぜ冷蔵、翌朝そのまま（加熱不要）｜ソイは強化ビタミン(VitC/A/D/B群)を含む。1杯なのでダマになりにくい'},
@@ -1617,8 +1618,8 @@ const SHOPPING_HC_D = [
 ];
 
 // CAL_TGT / PROT_TGT は上部の IS_TRAIN で動的設定済み
-const FAT_TGT   = IS_TRAIN ? 65  : 55;
-const CARB_TGT  = IS_TRAIN ? 244 : 179;
+const FAT_TGT   = 45;
+const CARB_TGT  = 288;
 const FIBER_TGT = 25;
 function ring(pct,color,r){
   const c=r+7,circ=2*Math.PI*r,dash=circ*Math.min(1,pct);
@@ -1763,21 +1764,7 @@ function renderNutrition() {
     <button id="nutr-toggle-btn" onclick="toggleNutrDetail()" style="width:100%;background:var(--surface2);border:none;border-radius:8px;padding:9px;font-size:12px;color:var(--text3);cursor:pointer;-webkit-tap-highlight-color:transparent;">${_nutrExpanded?'▲ 閉じる':'▼ 全23項目を表示'}</button>`;
 
   const badge = document.getElementById('train-day-badge');
-  if(badge){
-    if(todayDow===3){
-      badge.textContent = '🚴 4×4（Zone5）日';
-      badge.style.background = 'rgba(255,149,0,.1)'; badge.style.color = 'var(--orange)';
-    } else if(IS_TRAIN){
-      badge.textContent = '🏋️ 筋トレ日';
-      badge.style.background = 'rgba(52,199,89,.1)'; badge.style.color = 'var(--green)';
-    } else if([6,0].includes(todayDow)){
-      badge.textContent = '🚴 Zone2 日';
-      badge.style.background = 'rgba(255,149,0,.1)'; badge.style.color = 'var(--orange)';
-    } else {
-      badge.textContent = '💤 休養日';
-      badge.style.background = 'rgba(0,122,255,.1)'; badge.style.color = 'var(--blue)';
-    }
-  }
+  if(badge){badge.textContent='🏋️ 毎日同じPFC目標';badge.style.background='rgba(52,199,89,.1)';badge.style.color='var(--green)';}
   function barHtml(rows){
     const GOAL_PCT='66.67';
     return rows.map(m=>{
