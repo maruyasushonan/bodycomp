@@ -333,6 +333,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .cel-t{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;}
 .cel-s{font-size:14px;color:var(--text3);}
 </style>
+<style id="bc-day-thumbnail-style">
+.bc-thumb{width:72px;height:72px;min-width:72px;min-height:72px;display:inline-flex;position:relative;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:#e9edf2;vertical-align:middle}
+.bc-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.bc-thumb-fallback{font-size:29px}
+.bc-mobile-ex .top{display:flex;align-items:center;gap:10px}
+</style>
 </head>
 <body>
 <div id="app">
@@ -3930,7 +3936,7 @@ function bcGuide(){
   const weight=c.mode==='machine'?'マシン依存':c.mode==='bodyweight'?'自重':c.weight!==null&&c.weight!==undefined?c.weight+'kg':previous?previous.weight+'kg（前回実績）':'未設定';
   const grade=bcDpResult(e.n,date);
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
-  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span><span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint">休憩 ${bcEscape(e.rest)} ／ 目標 RIR ${c.rir}以上<br>${bcEscape(next)}</div><details><summary>Shuru原型・設定について</summary><div class="bc-dp-note">Shuru参考：${bcEscape(e.reps)}、${e.sets}セット（あなたの目標ではありません）</div>${bcDpCard(e.n,idx+'-'+i,date)}</details></div>`;
+  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint">休憩 ${bcEscape(e.rest)} ／ 目標 RIR ${c.rir}以上<br>${bcEscape(next)}</div><details><summary>Shuru原型・設定について</summary><div class="bc-dp-note">Shuru参考：${bcEscape(e.reps)}、${e.sets}セット（あなたの目標ではありません）</div>${bcDpCard(e.n,idx+'-'+i,date)}</details></div>`;
  });
  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインダンベルは片手当たりの暫定候補で、肩の反応を確認し、必要ならさらに減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
  root.innerHTML=html;
@@ -3951,7 +3957,7 @@ function bcDraw(){
  if(idx===0||idx===4)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
  if(idx===3)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 過去にドラゴンフラッグ後の強い腹痛があったため、回復と症状を確認してから再開を判断してください。</div>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exerciseId===id);const last=DB.trainingLogs.filter(x=>x.exerciseId===id&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
- html+=`<div class="bc-ex"><div class="bc-ex-head">${i+1}. ${bcEscape(e.n)}</div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
+ html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(today)html+=`<button class="bc-smallbtn" style="width:100%;margin-top:10px" onclick="bcFinish()">本日のトレーニングを完了</button>`;
