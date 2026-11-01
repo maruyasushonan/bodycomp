@@ -3877,6 +3877,37 @@ function bcDateOffset(date,n){let d=new Date(date+'T12:00:00');d.setDate(d.getDa
 function bcDay(date){return BC_PARTS[bcIndex(date)];}
 function bcEscape(str){return String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
+const BC_IMAGE_SLUGS={
+ 'バーベルベンチプレス':'barbell-bench-press',
+ '低角度インクラインダンベルプレス（片手重量）':'incline-dumbbell-bench-press',
+ 'プレートロード・インクラインプレス':'incline-chest-press-machine',
+ 'ペックデック（無痛時のみ）':'pec-deck',
+ 'スクワット':'barbell-back-squat',
+ 'ブルガリアンスクワット（片手重量）':'bulgarian-split-squat',
+ 'レッグカール（マシン重量）':'seated-leg-curl',
+ 'カーフプレス（マシン重量）':'calf-press',
+ 'ノーマル懸垂':'pull-up',
+ 'プレートロード・シーテッドロー':'seated-row-machine',
+ 'ワンハンドダンベルロウ（片手重量）':'one-arm-dumbbell-row',
+ 'ラットプルダウン（マシン重量）':'lat-pulldown',
+ 'アブドミナルクランチ（マシン重量）':'machine-crunch',
+ 'アブローラー（膝コロ）':'ab-wheel-rollout',
+ 'パロフプレス（ケーブル重量）':'pallof-press',
+ 'ラテラルレイズマシン':'machine-lateral-raise',
+ 'ケーブル・ラテラルレイズ':'cable-lateral-raise',
+ 'リアデルトマシン':'reverse-pec-deck',
+ 'チェストサポート・リアレイズ':'incline-rear-delt-fly',
+ 'ケーブル外旋':'cable-external-rotation',
+ 'EZバーカール':'ez-bar-curl',
+ 'インクラインダンベルカール':'incline-dumbbell-curl',
+ 'ケーブルプレスダウン':'triceps-pushdown',
+ '片手ケーブルプレスダウン':'single-arm-triceps-pushdown'
+};
+function bcExerciseThumb(name){
+ const slug=BC_IMAGE_SLUGS[name];
+ const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+'-peak.webp':'';
+ return '<span class="bc-thumb"><span class="bc-thumb-fallback">🏋️</span>'+(url?'<img loading="lazy" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+'</span>';
+}
 function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();
  BC_BACK_REVISED[1]=bcBackRow();
