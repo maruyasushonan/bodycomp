@@ -3777,7 +3777,15 @@ const BC_ABS_REVISED=[
  {n:'アブローラー（膝コロ）',sets:2,reps:'自重×6〜10回・可動域を短く開始',rest:'120秒',extra:'以前の強い腹痛が完全に解消している場合のみ。腰を反らさず痛みが出る前に停止'},
  {n:'パロフプレス（ケーブル重量）',sets:1,reps:'表示5kg（暫定）×10〜12回／側・RIR2〜3',rest:'60〜90秒',extra:'左右各1セット。肩に痛みがあれば省略、ケーブルの負荷は実機で調整'}
 ];
-const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_PLAN[2],BC_PLAN[4],[]];
+const BC_SHOULDER_LAT_A={n:'ラテラルレイズマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
+const BC_SHOULDER_LAT_B={n:'ケーブル・ラテラルレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒'};
+const BC_SHOULDER_REAR_A={n:'リアデルトマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
+const BC_SHOULDER_REAR_B={n:'チェストサポート・リアレイズ',sets:3,reps:'片手2kg（暫定）・12〜20回',rest:'90〜120秒'};
+function bcShoulderLat(){return DB.trainingSettings?.shoulderLatChoice==='cable'?BC_SHOULDER_LAT_B:BC_SHOULDER_LAT_A;}
+function bcShoulderRear(){return DB.trainingSettings?.shoulderRearChoice==='dumbbell'?BC_SHOULDER_REAR_B:BC_SHOULDER_REAR_A;}
+function bcSetShoulderChoice(part,v){DB.trainingSettings[part==='lat'?'shoulderLatChoice':'shoulderRearChoice']=v;save();bcDraw();}
+const BC_SHOULDERS_REVISED=[bcShoulderLat(),bcShoulderRear(),{n:'ケーブル外旋',sets:2,reps:'表示1kg（暫定）・12〜15回/側',rest:'60〜90秒'}];
+const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_SHOULDERS_REVISED,BC_PLAN[4],[]];
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
