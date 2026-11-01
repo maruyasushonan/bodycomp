@@ -3785,7 +3785,13 @@ function bcShoulderLat(){return DB.trainingSettings?.shoulderLatChoice==='cable'
 function bcShoulderRear(){return DB.trainingSettings?.shoulderRearChoice==='dumbbell'?BC_SHOULDER_REAR_B:BC_SHOULDER_REAR_A;}
 function bcSetShoulderChoice(part,v){DB.trainingSettings[part==='lat'?'shoulderLatChoice':'shoulderRearChoice']=v;save();bcDraw();}
 const BC_SHOULDERS_REVISED=[bcShoulderLat(),bcShoulderRear(),{n:'ケーブル外旋',sets:2,reps:'表示1kg（暫定）・12〜15回/側',rest:'60〜90秒'}];
-const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_SHOULDERS_REVISED,BC_PLAN[4],[]];
+const BC_ARMS_REVISED=[
+ {n:'EZバーカール',sets:3,reps:'バー込み25kg（暫定）・8〜12回',rest:'120秒',extra:'RIR2〜3'},
+ {n:'インクラインダンベルカール',sets:2,reps:'片手8kg（暫定）・10〜15回',rest:'90〜120秒',extra:'肩に痛みがある場合は中止'},
+ {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3'},
+ {n:'片手ケーブルプレスダウン',sets:2,reps:'表示5kg（暫定）・12〜15回/腕',rest:'90秒',extra:'左右各2セット'}
+];
+const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_SHOULDERS_REVISED,BC_ARMS_REVISED,[]];
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
