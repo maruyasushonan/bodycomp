@@ -1,5 +1,5 @@
 const CACHE = 'bodycomp-v98-sixsplit-meals';
-const OFFLINE_ASSETS = ['/', '/index.html'];
+const OFFLINE_ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
