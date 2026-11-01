@@ -3749,7 +3749,7 @@ const BC_PLAN=[
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
 // 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
 const BC_CHEST_REVISED=[
- {n:'フラットダンベルベンチプレス（片手重量）',sets:3,reps:'片手32kgから開始を検討・6〜10回 / RIR2〜3',rest:'150〜180秒',extra:'40kg×2で5回無痛の実績を参考。肩や翌日の反応で減量する'},
+ {n:'バーベルベンチプレス',sets:3,reps:'80kg × 5〜8回 × 3セット / RIR2目安',rest:'180秒',extra:'実績：80kg×5回を3セット、最終セットも余力あり・痛みなし。翌日の肩症状が増える場合は減量'},
  {n:'低角度インクラインダンベルプレス（片手重量）',sets:2,reps:'15〜30度・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。軽量から確認しRIR2〜3を優先'},
  {n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン依存・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'水平内転痛の既往あり。痛む場合は省略'}
 ];
@@ -3764,7 +3764,7 @@ if(!DB.trainingSettings.strengthMax) DB.trainingSettings.strengthMax={bench:105,
 if(!DB.trainingSettings.progression) DB.trainingSettings.progression={};
 const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key:'squat',name:'バーベルスクワット',low:120,high:125},{key:'deadlift',name:'デッドリフト',low:130,high:135}];
 const BC_DEFAULT_DP={
- 'フラットダンベルベンチプレス（片手重量）':{min:6,max:10,sets:3,step:2,rir:2,weight:32},
+ 'バーベルベンチプレス':{min:5,max:8,sets:3,step:2.5,rir:2,weight:80},
  '低角度インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
  'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
  'スクワット':{min:8,max:12,sets:3,step:2.5,rir:2,weight:87.5},
@@ -3837,7 +3837,7 @@ function bcGuide(){
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
   html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span><span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint">休憩 ${bcEscape(e.rest)} ／ 目標 RIR ${c.rir}以上<br>${bcEscape(next)}</div><details><summary>Shuru原型・設定について</summary><div class="bc-dp-note">Shuru参考：${bcEscape(e.reps)}、${e.sets}セット（あなたの目標ではありません）</div>${bcDpCard(e.n,idx+'-'+i,date)}</details></div>`;
  });
- html+=`<div class="bc-dp-note">※胸の日のダンベル重量は片手当たりの暫定候補です。40kg×2で5回の実績だけで適正重量は確定できません。肩の反応を確認し、必要ならさらに減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
+ html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインダンベルは片手当たりの暫定候補で、肩の反応を確認し、必要ならさらに減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
  root.innerHTML=html;
 }
 function bcDraw(){
