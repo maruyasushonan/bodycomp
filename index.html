@@ -454,34 +454,63 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </div>
   </div>
 
+  <style>
+.bc-food-hero{background:linear-gradient(135deg,#102e55,#1668ad);color:white;padding:20px 16px;border-radius:18px;margin-bottom:14px}
+.bc-food-eyebrow{font-size:11px;opacity:.86;font-weight:700;letter-spacing:.06em}
+.bc-food-kcal{font-size:34px;font-weight:800;margin:6px 0 15px;letter-spacing:-.035em}
+.bc-food-kcal span{font-size:13px;font-weight:500}
+.bc-food-hero-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.bc-food-hero-grid>div{background:rgba(255,255,255,.13);border-radius:10px;padding:10px 4px;text-align:center}
+.bc-food-hero-grid b{font-size:23px;display:block}
+.bc-food-hero-grid b small{font-size:12px;font-weight:500}
+.bc-food-hero-grid span{display:block;font-size:10px;opacity:.86;margin-top:2px}
+.bc-food-section-title{font-size:14px;font-weight:750;margin:17px 3px 10px}
+.bc-food-card{background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:15px;margin-bottom:10px}
+.bc-food-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:17px;font-weight:750}
+.bc-food-head small{font-size:10px;color:var(--text3);font-weight:500}
+.bc-food-head strong{font-size:17px;white-space:nowrap}
+.bc-food-macros{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0}
+.bc-food-macros span{font-size:12px;font-weight:650;background:var(--surface2);padding:5px 10px;border-radius:8px}
+.bc-food-list{font-size:13px;line-height:1.8;color:var(--text2)}
+.bc-food-list>div{border-top:1px solid var(--border);padding:4px 0}
+.bc-food-card details{margin-top:10px;font-size:12px}
+.bc-food-card summary{color:var(--blue);font-weight:650;cursor:pointer}
+.bc-food-drink{border-color:rgba(13,123,215,.4)}
+.bc-food-remaining{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.bc-food-remaining>div{text-align:center;border-radius:9px;background:var(--surface2);padding:10px 3px}
+.bc-food-remaining b{font-size:20px;display:block}
+.bc-food-remaining small{font-size:11px;color:var(--text3)}
+.bc-food-hint{font-size:11px;line-height:1.6;color:var(--text3)}
+</style>
   <!-- ③栄養 -->
   <div id="sc-food" class="screen">
-    <div class="seg-ctrl">
+    <div id="bc-food-mobile"></div>
+    <details class="card" style="margin-top:5px;"><summary style="font-weight:700;cursor:pointer;font-size:13px;">過去の献立・買い物リスト・参考資料</summary><div class="seg-ctrl" style="margin-top:12px;">
       <button id="tab-today" class="seg-btn active" onclick="switchFoodTab('today')">📊 今日</button>
       <button id="tab-menu"  class="seg-btn" onclick="switchFoodTab('menu')">🍽 献立（旧案）</button>
       <button id="tab-shop"  class="seg-btn" onclick="switchFoodTab('shop')">🛒 買い物（旧案）</button>
       <button id="tab-shuru" class="seg-btn" onclick="switchFoodTab('shuru')">📋 Shuru参考</button>
     </div>
 
+    </details>
+
     <!-- 今日ビュー -->
     <div id="view-today">
-      <div class="card">
+      <details class="card"><summary style="font-size:13px;font-weight:700;cursor:pointer;">食事記録の進捗・栄養素23項目を見る</summary><div style="height:12px"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <div class="card-title" style="margin-bottom:0;">今日の栄養</div>
           <div id="train-day-badge" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;"></div>
         </div>
         <div style="background:var(--surface2);border-radius:12px;padding:13px;margin-bottom:13px;"><div style="font-size:11px;color:var(--text3);">毎日の固定目標 · 6分割トレーニング</div><div style="font-size:26px;font-weight:800;margin:4px 0;">2,197 <span style="font-size:13px;font-weight:500;">kcal</span></div><div style="display:flex;justify-content:space-between;gap:7px;font-size:13px;font-weight:700;"><span>P 160g</span><span>F 45g</span><span>C 288g</span></div><div style="font-size:11px;color:var(--text3);margin-top:7px;">糖質288gにはトレーニング中のマルトデキストリン20gを含みます。</div></div><div id="nutr-summary"></div><button class="bc-smallbtn" style="width:100%;margin:0 0 12px;" onclick="quickAddPresetByName('マルトデキストリン20g（トレーニング中）')">＋ マルトデキストリン20gを今日の食事に追加（80kcal）</button>
         <div id="macro-bars" style="display:none;border-top:0.5px solid var(--surface2);padding-top:14px;margin-top:8px;"></div>
-      </div>
-      <div class="card">
-        <div class="card-title" style="margin-bottom:8px;">🍽 食事ごとの内訳</div>
+      </details>
+      <details style="margin-bottom:12px;" class="card"><summary style="font-size:13px;font-weight:700;cursor:pointer;">食事ごとの詳しい栄養内訳</summary><div style="margin-top:12px;"><div class="card-title" style="margin-bottom:8px;">🍽 食事ごとの内訳</div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">どの食事がどの栄養素をどれだけ補っているか</div>
-        <div id="meal-breakdown"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">今日の食事</div>
+        <div id="meal-breakdown"></div></div>
+      </details>
+      <details class="card"><summary style="font-size:13px;font-weight:700;cursor:pointer;">今日の食事記録を確認・編集する</summary><div style="margin-top:12px;" class="card-title">今日の食事</div>
         <div id="mlist"></div>
-      </div>
+      </details>
     </div>
 
     <!-- Shuru動画由来の参照食事プラン。個人用の実績・目標とは分離 -->
@@ -1710,7 +1739,21 @@ function renderMealBreakdown(){
 
   el.innerHTML = `<div style="margin-bottom:12px;">${legendHtml}</div>${barsHtml}`;
 }
+// Fixed meal plans: estimates, not automatically counted as consumed.
+const BC_FIXED_MEALS=[
+ {name:'朝食',emoji:'🌅',kcal:585,p:41,f:14.6,c:80.2,foods:['オートミール 70g','マルサン無調整豆乳 200mL','OgarMade ソイプロテイン・リッチチョコ 28g','チアシード 小さじ1（約4g）','バナナ 可食部100g','カカオニブ 小さじ1（約3g）']},
+ {name:'昼食',emoji:'🥗',kcal:534,p:48.2,f:7,c:74.1,foods:['千切りキャベツ 1/2袋（仮75g）','ノンオイルドレッシング 大さじ1','内野家サラダチキン 1袋（計算仮定100g）','キユーピー サラダクラブ ミックスビーンズ 50g','ごぼうと鶏肉の炊き込みご飯 250g']}
+];
+const BC_RICE_RECIPE=['白米 150g＋もち麦 1合相当（暫定乾燥100g）','ごぼう100g／鶏もも肉（皮なし）150g／にんじん50g／しめじ80g','油揚げ約15g／乾燥ひじき3g','醤油 大さじ1.5、酒・みりん・白だし 各大さじ1、しょうが5g','炊き上がり計1,110g：250g×3＋180g×2'];
+function bcFoodMobile(){
+ const el=document.getElementById('bc-food-mobile');if(!el)return;
+ const meal=BC_FIXED_MEALS,done=meal.reduce((a,m)=>({kcal:a.kcal+m.kcal,p:a.p+m.p,f:a.f+m.f,c:a.c+m.c}),{kcal:0,p:0,f:0,c:0});
+ const remain={kcal:2197-done.kcal-80,p:160-done.p,f:45-done.f,c:288-done.c-20};
+ const rows=meal.map(m=>`<div class="bc-food-card"><div class="bc-food-head"><span>${m.emoji} ${m.name} <small>毎日固定</small></span><strong>${m.kcal} kcal</strong></div><div class="bc-food-macros"><span>P ${m.p}g</span><span>F ${m.f}g</span><span>C ${m.c}g</span></div><div class="bc-food-list">${m.foods.map(x=>`<div>${bcEscape(x)}</div>`).join('')}</div>${m.name==='昼食'?`<details><summary>炊き込みご飯のレシピ・小分け量</summary><div class="bc-food-list">${BC_RICE_RECIPE.map(x=>`<div>${bcEscape(x)}</div>`).join('')}</div></details>`:''}</div>`).join('');
+ el.innerHTML=`<div class="bc-food-hero"><div class="bc-food-eyebrow">DAILY NUTRITION · 毎日共通</div><div class="bc-food-kcal">2,197 <span>kcal / 日</span></div><div class="bc-food-hero-grid"><div><b>160<small>g</small></b><span>タンパク質</span></div><div><b>45<small>g</small></b><span>脂質</span></div><div><b>288<small>g</small></b><span>炭水化物</span></div></div></div><div class="bc-food-section-title">毎日これを食べる</div>${rows}<div class="bc-food-card bc-food-drink"><div class="bc-food-head"><span>🥤 トレーニング中</span><strong>80 kcal</strong></div><div class="bc-food-macros"><span>マルトデキストリン 20g</span><span>C 20g</span></div><div class="bc-food-list">水に混ぜて飲む。1日目標C288gの内数。</div></div><div class="bc-food-card"><div class="bc-food-head"><span>🌙 夕食・その他で補う目安</span><strong>約${remain.kcal} kcal</strong></div><div class="bc-food-remaining"><div><b>${remain.p.toFixed(1)}g</b><small>P</small></div><div><b>${remain.f.toFixed(1)}g</b><small>F</small></div><div><b>${remain.c.toFixed(1)}g</b><small>C</small></div></div><div class="bc-food-hint">朝・昼・トレーニング中の計画値を差し引いた残り。夕食はこれから設計します。</div></div><div class="bc-food-hint" style="padding:3px 5px 15px">※ 朝食585kcal、昼食534kcalは暫定推定値です。豆乳・プロテインの製品ラベル、ドレッシング銘柄、炊き込みご飯の実測重量により変わります。固定メニューは食べた実績として自動登録しません。</div>`;
+}
 function renderNutrition() {
+  bcFoodMobile();
   const today = DB.meals.filter(m=>m.date===TODAY);
   const r = f => today.reduce((a,m)=>a+(m[f]||0),0);
   const cal=r('cal'),prot=r('prot'),fat=r('fat'),carbs=r('carbs'),fiber=r('fiber');
