@@ -490,7 +490,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 </style>
   <!-- ③栄養 -->
   <div id="sc-food" class="screen">
-    <div id="bc-food-mobile"></div>
+    <div id="bc-food-mobile"><div class="bc-food-hero"><div class="bc-food-eyebrow">DAILY NUTRITION · 固定献立（概算）</div><div class="bc-food-kcal">2,197 <span>kcal / 日</span></div><div class="bc-food-hero-grid"><div><b>160<small>g</small></b><span>タンパク質</span></div><div><b>45<small>g</small></b><span>脂質</span></div><div><b>288<small>g</small></b><span>炭水化物</span></div></div></div><div class="bc-food-section-title">朝食</div><div class="bc-food-card"><div class="bc-food-head"><span>🌅 朝食</span><strong>585 kcal</strong></div><div class="bc-food-macros"><span>P 41g</span><span>F 14.6g</span><span>C 80.2g</span></div><div class="bc-food-list"><div>オートミール70g</div><div>無調整豆乳200mL</div><div>OgarMadeソイプロテイン28g</div><div>チアシード小さじ1</div><div>バナナ100g</div><div>カカオニブ小さじ1</div></div></div><div class="bc-food-section-title">昼食</div><div class="bc-food-card"><div class="bc-food-head"><span>🥗 昼食</span><strong>534 kcal</strong></div><div class="bc-food-macros"><span>P 48.2g</span><span>F 7g</span><span>C 74.1g</span></div><div class="bc-food-list"><div>千切りキャベツ</div><div>ノンオイルドレッシング</div><div>サラダチキン100g（暫定）</div><div>ミックスビーンズ50g</div><div>炊き込みご飯250g</div></div></div><div class="bc-food-section-title">夕食</div><div class="bc-food-card"><div class="bc-food-head"><span>🌙 夕食</span><strong>650 kcal</strong></div><div class="bc-food-macros"><span>P 49g</span><span>F 24.1g</span><span>C 73.9g</span></div><div class="bc-food-list"><div>銀鮭約87g（暫定）</div><div>納豆2パック</div><div>ブロッコリー約60g</div><div>しめじ約50g</div><div>炊き込みご飯250g</div></div></div><div class="bc-food-section-title">間食・トレーニング補給</div><div class="bc-food-card"><div class="bc-food-head"><span>🍌 トレーニング前</span><strong>199 kcal</strong></div><div class="bc-food-macros"><span>P 21.6g</span><span>F 1.4g</span><span>C 26g</span></div><div class="bc-food-list"><div>OgarMadeソイプロテイン28g</div><div>バナナ1本</div></div></div><div class="bc-food-card"><div class="bc-food-head"><span>💧 トレーニング中</span><strong>80 kcal</strong></div><div class="bc-food-macros"><span>P 0g</span><span>F 0g</span><span>C 20g</span></div><div class="bc-food-list"><div>マルトデキストリン20g</div></div></div><div class="bc-food-hint">※ 固定献立の暫定推定値です。食べた実績として自動記録されません。</div></div>
     <details class="card" style="margin-top:5px;"><summary style="font-weight:700;cursor:pointer;font-size:13px;">過去の献立・買い物リスト・参考資料</summary><div class="seg-ctrl" style="margin-top:12px;">
       <button id="tab-today" class="seg-btn active" onclick="switchFoodTab('today')">📊 今日</button>
       <button id="tab-menu"  class="seg-btn" onclick="switchFoodTab('menu')">🍽 献立（旧案）</button>
@@ -822,6 +822,7 @@ function go(s) {
   document.getElementById('fab').style.display = s==='lib' ? 'none' : 'flex';
   cur = s;
   if(s==='train'){ renderProgram(); renderVol(); }
+  if(s==='food' && typeof bcFoodMobile==='function') bcFoodMobile();
 }
 document.getElementById('hdate').textContent = `${_d.getFullYear()}年${_d.getMonth()+1}月${_d.getDate()}日（${'日月火水木金土'[_d.getDay()]}）`;
 document.getElementById('hbtn').style.display = 'block';
