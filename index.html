@@ -3682,6 +3682,38 @@ let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
 if(bcMigrated) save();
 if(!DB.trainingSettings) DB.trainingSettings={};
+// 1RM data are confirmed one-repetition maximums, not RIR=1 single reps.
+if(!DB.trainingSettings.strengthMax) DB.trainingSettings.strengthMax={bench:105,squat:122.5,deadlift:132.5};
+if(!DB.trainingSettings.progression) DB.trainingSettings.progression={};
+const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key:'squat',name:'バーベルスクワット',low:120,high:125},{key:'deadlift',name:'デッドリフト',low:130,high:135}];
+const BC_DEFAULT_DP={
+ 'スクワット':{min:8,max:12,sets:3,step:2.5,rir:2,weight:87.5},
+ 'インクラインベンチプレス':{min:8,max:12,sets:3,step:2.5,rir:2,weight:null},
+ 'ノーマル懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0},
+ 'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
+};
+function bcDpConfig(name){return Object.assign({min:8,max:12,sets:3,step:2.5,rir:2,weight:null},BC_DEFAULT_DP[name]||{},DB.trainingSettings.progression[name]||{});}
+function bcDpResult(name,date){
+ const cfg=bcDpConfig(name),all=DB.trainingLogs.filter(x=>x.exercise===name&&x.date===date).sort((a,b)=>(a.ts||0)-(b.ts||0));
+ if(!all.length)return null;
+ const active=all.slice(-cfg.sets);
+ const equal=active.every(x=>Number(x.weight)===Number(active[0].weight));
+ const pain=active.some(x=>Number(x.pain)>0);
+ const ready=active.length===cfg.sets&&equal&&active.every(x=>Number(x.reps)>=cfg.max&&Number(x.rir)>=cfg.rir)&&!pain;
+ return {ready,done:active.length,needed:cfg.sets,weight:active[0].weight,step:cfg.step,pain,hasEnough:active.length===cfg.sets};
+}
+function bcSaveMax(key){const el=document.getElementById('bc-max-'+key);if(!el)return;const n=Number(el.value);if(!Number.isFinite(n)||n<=0||n>600){alert('1RMを正しく入力してください');return;}DB.trainingSettings.strengthMax[key]=n;save();bcDraw();}
+function bcSaveDp(name,id){const input=k=>document.getElementById('bc-dp-'+k+'-'+id);const min=Number(input('min').value),max=Number(input('max').value),sets=Number(input('sets').value),rir=Number(input('rir').value),step=Number(input('step').value);const raw=input('weight').value;const weight=raw===''?null:Number(raw);
+ if(!Number.isInteger(min)||min<1||!Number.isInteger(max)||max<min||max>40||!Number.isInteger(sets)||sets<1||sets>15||!Number.isInteger(rir)||rir<0||rir>5||!Number.isFinite(step)||step<=0||step>20||(weight!==null&&(!Number.isFinite(weight)||weight<0||weight>600))){alert('目標値を確認してください');return;}
+ DB.trainingSettings.progression[name]={min,max,sets,rir,step,weight};save();bcDraw();
+}
+function bcDpCard(name,id,date){
+ const c=bcDpConfig(name),result=bcDpResult(name,date);
+ const suggested=result&&result.ready?(Number(result.weight)+c.step):c.weight;
+ const status=result?(result.pain?'痛みの記録あり：増量せず負荷と種目を再評価':result.ready?'全セット達成：次回 '+suggested+'kg を増量候補として提示（強制ではありません）':result.done<c.sets?'記録 '+result.done+'/'+c.sets+' セット：判定保留':'今回は重量維持。フォーム・回数・RIRを優先'):'記録前：まずは無理のない重量でRIRを確認';
+ return `<details style="margin:9px 0;border:1px solid var(--border);border-radius:9px;padding:9px;"><summary style="cursor:pointer;font-size:12px;font-weight:700;">自分の目標・ダブルプログレッション設定</summary><div style="font-size:11px;color:var(--text3);margin:8px 0;">Shuru原型とは別保存。全セットで同一重量・上限回数・RIR以上・痛み0を満たした場合のみ増量候補。</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">${[['min','下限回数',c.min],['max','上限回数',c.max],['sets','目標セット',c.sets],['rir','最低RIR',c.rir],['step','増量kg',c.step],['weight','初期kg',c.weight??'']].map(([k,l,v])=>`<label style="font-size:10px;">${l}<input id="bc-dp-${k}-${id}" type="number" min="0" step="${k==='step'||k==='weight'?'0.5':'1'}" value="${v}" style="width:100%;min-width:0;padding:6px;"></label>`).join('')}</div><button class="bc-smallbtn" style="margin-top:8px;" onclick="bcSaveDp('${bcEscape(name)}','${id}')">目標を保存</button></details><div class="bc-note" style="margin:7px 0;color:${result&&result.pain?'var(--red)':'var(--text3)'}">${status}</div>`;
+}
+
 let bcViewDate=TODAY;
 let bcGraphs=[];
 function bcIndex(date){const a=Date.parse(BC_START+'T12:00:00'),b=Date.parse(date+'T12:00:00');return ((Math.round((b-a)/86400000)%6)+6)%6;}
@@ -3692,13 +3724,14 @@ function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 function bcDraw(){
  const idx=bcIndex(bcViewDate),items=BC_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
  const today=bcViewDate===TODAY;
- let html=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
+ let html=`<div style="background:var(--surface2);padding:12px;border-radius:12px;margin-bottom:12px;"><b>筋力基準（1RM）</b><div class="bc-note">1回だけ挙上できる限度。参考値はベンチ105kg、スクワット120〜125kg、デッドリフト130〜135kg。以下は代表値で編集可能。デッドリフトは現行6分割には未追加。</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px;">${BC_STRENGTH.map(t=>`<label style="font-size:10px;">${t.name}<input id="bc-max-${t.key}" type="number" step="0.5" min="1" value="${DB.trainingSettings.strengthMax[t.key]}" style="width:100%;min-width:0;padding:6px;"><button class="bc-smallbtn" style="margin-top:5px;" onclick="bcSaveMax('${t.key}')">保存</button></label>`).join('')}</div></div>`;
+ html+=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">D${i+1}<br>${p}</button>`).join('')}</div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
  if(idx===0||idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
  if(idx===5)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 過去にドラゴンフラッグ後の強い腹痛があったため、回復と症状を確認してから再開を判断してください。</div>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exerciseId===id);const last=DB.trainingLogs.filter(x=>x.exerciseId===id&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
- html+=`<div class="bc-ex"><div class="bc-ex-head">${i+1}. ${bcEscape(e.n)}</div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
+ html+=`<div class="bc-ex"><div class="bc-ex-head">${i+1}. ${bcEscape(e.n)}</div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(today)html+=`<button class="bc-smallbtn" style="width:100%;margin-top:10px" onclick="bcFinish()">本日のトレーニングを完了</button>`;
