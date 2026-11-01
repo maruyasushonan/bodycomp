@@ -2,7 +2,7 @@
   "name": "BodyComp",
   "short_name": "BodyComp",
   "description": "体組成管理・リコンポジション追跡アプリ",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
