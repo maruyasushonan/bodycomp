@@ -3748,9 +3748,13 @@ const BC_PLAN=[
 ];
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
 // 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
+const BC_CHEST_INCLINE_DB={n:'低角度インクラインダンベルプレス（片手重量）',sets:2,reps:'15〜30度・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。片手重量を記録しRIR2〜3を優先'};
+const BC_CHEST_INCLINE_MACHINE={n:'プレートロード・インクラインプレス',sets:2,reps:'8〜12回・マシン固有の重量で設定',rest:'120〜150秒',extra:'無痛の軌道・可動域で実施。マシンの表示重量はダンベル重量と別管理'};
+function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='machine'?BC_CHEST_INCLINE_MACHINE:BC_CHEST_INCLINE_DB;}
+function bcSetChestIncline(choice){if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
 const BC_CHEST_REVISED=[
  {n:'バーベルベンチプレス',sets:3,reps:'80kg × 5〜8回 × 3セット / RIR2目安',rest:'180秒',extra:'実績：80kg×5回を3セット、最終セットも余力あり・痛みなし。翌日の肩症状が増える場合は減量'},
- {n:'低角度インクラインダンベルプレス（片手重量）',sets:2,reps:'15〜30度・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。軽量から確認しRIR2〜3を優先'},
+ bcChestIncline(),
  {n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン依存・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'水平内転痛の既往あり。痛む場合は省略'}
 ];
 const BC_LEGS_REVISED=[
@@ -3772,6 +3776,7 @@ const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key
 const BC_DEFAULT_DP={
  'バーベルベンチプレス':{min:5,max:8,sets:3,step:2.5,rir:2,weight:80},
  '低角度インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
+ 'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
  'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
  'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
@@ -3781,7 +3786,7 @@ const BC_DEFAULT_DP={
  'ノーマル懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0},
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
 };
-const BC_MACHINE_NAMES=new Set(['ペックデック（無痛時のみ）','ケーブルプレスダウン','ワンハンドケーブルプル']);
+const BC_MACHINE_NAMES=new Set(['プレートロード・インクラインプレス','ペックデック（無痛時のみ）','ケーブルプレスダウン','ワンハンドケーブルプル']);
 const BC_BODYWEIGHT_NAMES=new Set(['ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
@@ -3830,11 +3835,13 @@ function bcDay(date){return BC_PARTS[bcIndex(date)];}
 function bcEscape(str){return String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 function bcGuide(){
+ BC_CHEST_REVISED[1]=bcChestIncline();
  const root=document.getElementById('bc-mobile-guide');if(!root)return;
  const idx=bcIndex(bcViewDate),date=bcViewDate,part=BC_PARTS[idx],items=BC_WEEKLY_PLAN[idx],isToday=date===TODAY;
  const estimated=items.reduce((n,x)=>n+bcDpConfig(x.n).sets,0);
  let html=`<div class="bc-hero"><div class="k">${isToday?'今日のトレーニング':'予定メニュー'} · ${idx===6?'休養日':'DAY '+(idx+1)+' / 6'} · ${date}</div><div class="name">${bcEscape(part)}</div><div class="meta">${items.length}種目 ／ 目標約${estimated}セット　·　重量・回数は自分用設定を優先</div></div>`;
  html+=`<div style="margin:8px 0 12px"><button class="bc-smallbtn" onclick="bcImportPcWeights()">↻ PCで保存した初期重量を読み込む</button><div class="bc-note" style="margin-top:5px">PCで重量を保存して同期が完了した後、スマホで1回押してください。既存の記録は消去しません。</div></div>`;
+ if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">② インクラインプレスの器具を選択</b><div class="bc-note" style="margin:5px 0 9px">ジムの空き状況に応じて切替。どちらか一方だけ2セット実施し、重量・進捗は種目別に保存します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice!=='machine'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('dumbbell')">ダンベル</button><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice==='machine'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('machine')">プレートロード</button></div></div>`;
  html+=`<div class="bc-guide-title">${idx===6?'日曜日は休養日です':'上から順番に実施するメニュー'}</div>`;
  if((idx===0||idx===4))html+=`<div class="bc-safety">⚠ 肩に痛みが出る種目は行わず、痛みのない代替種目に変更してください。</div>`;
  if(idx===3)html+=`<div class="bc-safety">⚠ ドラゴンフラッグ後の強い腹痛があったため、再実施は症状の消失を確認してから判断してください。</div>`;
@@ -3850,6 +3857,7 @@ function bcGuide(){
  root.innerHTML=html;
 }
 function bcDraw(){
+ BC_CHEST_REVISED[1]=bcChestIncline();
  const idx=bcIndex(bcViewDate),items=BC_WEEKLY_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
  const today=bcViewDate===TODAY;
  let html=`<div style="background:var(--surface2);padding:12px;border-radius:12px;margin-bottom:12px;"><b>筋力基準（1RM）</b><div class="bc-note">1回だけ挙上できる限度。参考値はベンチ105kg、スクワット120〜125kg、デッドリフト130〜135kg。以下は代表値で編集可能。デッドリフトは現行6分割には未追加。</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px;">${BC_STRENGTH.map(t=>`<label style="font-size:10px;">${t.name}<input id="bc-max-${t.key}" type="number" step="0.5" min="1" value="${DB.trainingSettings.strengthMax[t.key]}" style="width:100%;min-width:0;padding:6px;"><button class="bc-smallbtn" style="margin-top:5px;" onclick="bcSaveMax('${t.key}')">保存</button></label>`).join('')}</div></div>`;
