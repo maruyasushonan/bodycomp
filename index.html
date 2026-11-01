@@ -3939,6 +3939,7 @@ function bcGuide(){
   html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint">休憩 ${bcEscape(e.rest)} ／ 目標 RIR ${c.rir}以上<br>${bcEscape(next)}</div><details><summary>Shuru原型・設定について</summary><div class="bc-dp-note">Shuru参考：${bcEscape(e.reps)}、${e.sets}セット（あなたの目標ではありません）</div>${bcDpCard(e.n,idx+'-'+i,date)}</details></div>`;
  });
  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインダンベルは片手当たりの暫定候補で、肩の反応を確認し、必要ならさらに減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
+ html+='<div class="bc-note" style="margin-top:12px">運動画像：<a href="https://repdb.co/" target="_blank" rel="noopener noreferrer">Exercise data by RepDB (repdb.co)</a>。画像が取得できない種目はアイコンを表示します。</div>';
  root.innerHTML=html;
 }
 function bcDraw(){
