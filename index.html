@@ -3806,6 +3806,11 @@ const BC_DEFAULT_DP={
  'アブドミナルクランチ（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:15,mode:'weight'},
  'アブローラー（膝コロ）':{min:6,max:10,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
  'パロフプレス（ケーブル重量）':{min:10,max:12,sets:1,step:1,rir:3,weight:5,mode:'weight'},
+ 'ラテラルレイズマシン':{min:12,max:20,sets:3,step:1,rir:3,weight:5},
+ 'ケーブル・ラテラルレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2.5},
+ 'リアデルトマシン':{min:12,max:20,sets:3,step:1,rir:3,weight:5},
+ 'チェストサポート・リアレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2},
+ 'ケーブル外旋':{min:12,max:15,sets:2,step:0.5,rir:4,weight:1},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
  'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
  'レッグカール（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
@@ -3865,6 +3870,8 @@ function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();
  BC_BACK_REVISED[1]=bcBackRow();
+ BC_SHOULDERS_REVISED[0]=bcShoulderLat();
+ BC_SHOULDERS_REVISED[1]=bcShoulderRear();
  const root=document.getElementById('bc-mobile-guide');if(!root)return;
  const idx=bcIndex(bcViewDate),date=bcViewDate,part=BC_PARTS[idx],items=BC_WEEKLY_PLAN[idx],isToday=date===TODAY;
  const estimated=items.reduce((n,x)=>n+bcDpConfig(x.n).sets,0);
@@ -3889,6 +3896,8 @@ function bcGuide(){
 function bcDraw(){
  BC_CHEST_REVISED[1]=bcChestIncline();
  BC_BACK_REVISED[1]=bcBackRow();
+ BC_SHOULDERS_REVISED[0]=bcShoulderLat();
+ BC_SHOULDERS_REVISED[1]=bcShoulderRear();
  const idx=bcIndex(bcViewDate),items=BC_WEEKLY_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
  const today=bcViewDate===TODAY;
  let html=`<div style="background:var(--surface2);padding:12px;border-radius:12px;margin-bottom:12px;"><b>筋力基準（1RM）</b><div class="bc-note">1回だけ挙上できる限度。参考値はベンチ105kg、スクワット120〜125kg、デッドリフト130〜135kg。以下は代表値で編集可能。デッドリフトは現行6分割には未追加。</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px;">${BC_STRENGTH.map(t=>`<label style="font-size:10px;">${t.name}<input id="bc-max-${t.key}" type="number" step="0.5" min="1" value="${DB.trainingSettings.strengthMax[t.key]}" style="width:100%;min-width:0;padding:6px;"><button class="bc-smallbtn" style="margin-top:5px;" onclick="bcSaveMax('${t.key}')">保存</button></label>`).join('')}</div></div>`;
