@@ -593,6 +593,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <button class="lib-tab" data-tab="視力"          onclick="switchLibTab('視力')">👁 視力</button>
       <button class="lib-tab" data-tab="栄養"          onclick="switchLibTab('栄養')">🥦 栄養</button>
       <button class="lib-tab" data-tab="筋肥大"        onclick="switchLibTab('筋肥大')">💪 筋肥大</button>
+      <button class="lib-tab" data-tab="Shuru参考" onclick="switchLibTab('Shuru参考')">🏋️ Shuru参考</button>
       <button class="lib-tab" data-tab="有酸素"        onclick="switchLibTab('有酸素')">🏃 有酸素</button>
       <button class="lib-tab" data-tab="ストレス"      onclick="switchLibTab('ストレス')">💆 ストレス</button>
       <button class="lib-tab" data-tab="サプリ"        onclick="switchLibTab('サプリ')">💊 サプリ</button>
@@ -2878,6 +2879,70 @@ const SC_TIER_STYLE = {
   A:{label:'A TIER — 強いエビデンス',         col:'#ff9f0a', bg:'rgba(255,159,10,.1)'},
   B:{label:'B TIER — 実践価値が高い',         col:'#34c759', bg:'rgba(52,199,89,.1)'},
 };
+// Shuru's personal six-way split transcribed from the supplied video.
+// Keep separate from the user's training goals and from evidence-reviewed library entries.
+const SHURU_TRAINING_SOURCE='【6分割法】宅トレ1年半でここまで変わった筋トレメニューを全部公開（添付文字起こし）';
+const SHURU_SPLIT=[
+ {name:'胸',duration:'約2時間強',note:'胸上部を優先。原型はインクライン中心。',ex:[
+  ['インクラインベンチ','ウォームアップ→高重量→中重量→限界セット','ウォームアップ約12回×2、高重量4〜5回×2、中重量8〜10回×3、軽重量で限界×2','最初の段階は2分、最後の2セットは1分','重量の音声認識が「56km／106km／86km／56km」となっており要原動画確認'],
+  ['リバースグリップ・インクラインベンチ','約45kg','約13回×3セット','90秒','狭めの握り、胸上部内側を意識'],
+  ['ミドルダンベルプッシュ','約40kg（総量・片手の区別は不明）','約13回×3セット','90秒','胸の内側を収縮させる'],
+  ['ダンベルフライ（フラット）','片手約23kg','約13回×3セット','2分','ストレッチとフォーム優先'],
+  ['プレートレイズ','片側約10kgと発言','約10回×3セット','90秒','胸を伸ばし、上で収縮'],
+  ['ディップス','自重','約20回→15回→15回、3セット','記載なし','深く下ろして胸で押し上げる']
+ ]},
+ {name:'背中',duration:'約1.5〜2時間',note:'懸垂を中心に、最大可動域を重視。',ex:[
+  ['ノーマル懸垂','自重','4セット、初回約20回、その後約13→12→11回','90秒','毎セット限界まで、最下点・最上点まで動かす'],
+  ['ワイド懸垂','自重','約10回×3セット','記載なし','下ろし切り、上げ切る'],
+  ['ジーザス懸垂／ジーザスホールド','自重','約5〜6回×3セット／代替：十字姿勢約10秒保持','90秒','本人が両者を比較検証中'],
+  ['ベントオーバープル（音声表記）','約56kg→調子がよければ約86kg（音声認識要確認）','約12回×2→約10回×1〜2セット','2分','腰への負担と可動域を重視。種目名も原動画要確認'],
+  ['ワンハンドダンベルロー','片手40kg','約13回×左右各3セット','2分','器具上限のため回数増で進歩']
+ ]},
+ {name:'脚',duration:'約1〜1.5時間',note:'本人は脚をさらに太くすることを優先せず、臀部に効かせる。',ex:[
+  ['スクワット','ウォームアップ約56kg／本番約86kg（音声認識要確認）','約12回×2（準備）＋本番3セット（回数不明瞭）','2分','足幅を広めに取り、臀部を意識'],
+  ['ブルガリアンスクワット','両手に各約20kgのダンベル','約12回×3セット','2分','臀部を狙う'],
+  ['ノルディックハム','自重・手で補助','約10回×3セット','2分','ハムストリングス、肉離れに注意']
+ ]},
+ {name:'腕',duration:'約2〜2.5時間',note:'上腕二頭筋→三頭筋の順。',ex:[
+  ['EZバーカール','約40kg→50kg→45kg','約10回×1＋約10回×2＋約10回×3（計6セット）','2分','腰の反りを抑え、ネガティブを意識'],
+  ['リバースグリップカール','約40kg','約12回×3セット','90秒','前腕への刺激も意識'],
+  ['片手ダンベルカール','重量の明記なし','約10回・限界まで×3セット','90秒','ゆっくり下ろす'],
+  ['ケーブルプレスダウン','約30kg','約15回×4セット','90秒','肘の負担を避けて軽め・高回数'],
+  ['片手ケーブルプル','約12kg','約12回×3セット','90秒','肘への負担が少ないと本人が説明']
+ ]},
+ {name:'肩',duration:'約3時間',note:'横→後ろ→前の順、僧帽筋種目も含む。本人独自の種目名あり。',ex:[
+  ['サイドレイズ','片手約13kg','約15回×4セット','90秒','フォーム優先、僧帽筋への代償を減らす'],
+  ['シュラッグ','約40kg（持ち方は不明）','約20回×3セット','90秒','下げ切り、上げ切る'],
+  ['スリーピングサイドレイズ','約10kg','約10回×3セット','90秒','本人独自の呼称'],
+  ['スリーピングリア','約10kg','約10回×3セット','90秒','弧を描くように挙げ下げする'],
+  ['羽たき（本人の呼称）','約13kg、疲労時は1〜2kg減','約13回×3セット','90秒','後部狙い。正式名称は不明'],
+  ['元気玉（本人の呼称）','約25kg','約12回×3セット','2分','本人はミリタリープレスに近い種目と説明'],
+  ['フロントレイズ','約20kg','約10回×3セット','90秒','肩前部']
+ ]},
+ {name:'腹筋',duration:'約1〜1.5時間',note:'腹筋専用日を設け、高負荷で鍛える。',ex:[
+  ['デクラインクランチEX（本人独自版）','約15kg','約12回×4セット','2分','腰にマットを置いて可動域を広げる。疲れたらプレート位置を調整'],
+  ['アブローラー','自重（立ちコロ）','約10回×3セット','2分','限界時に膝コロへ変更'],
+  ['ドラゴンフラッグ','自重','約6〜7回×3セット','2分','高負荷、強い体幹コントロールを要する'],
+  ['サイドプル','片手約40kg','左右各15回×3セット','2分','下ろすときに息を吐き切る']
+ ]}
+];
+function renderShuruTrainingLibrary(){
+ const el=document.getElementById('lib-content');if(!el)return;
+ el.innerHTML='<div style="font-size:17px;font-weight:800;margin-bottom:7px">🏋️ Shuru氏の6分割トレーニング原型</div>'
+ +'<div style="font-size:12px;line-height:1.7;color:var(--text2);margin-bottom:12px">胸 → 背中 → 脚 → 腕 → 肩 → 腹筋の順番。毎日1部位、同じ部位は6日おき。本人は有酸素運動を行わないと説明しています。これは動画で紹介された本人の実践例であり、あなたの現行メニューや推奨負荷には反映しません。</div>'
+ +'<div style="font-size:11px;line-height:1.6;color:var(--text3);margin-bottom:14px">出典：'+SHURU_TRAINING_SOURCE+'。自動文字起こしに「km」などの誤認識があります。判別困難な重量・種目名・回数は要確認と記載し、推定で補完していません。</div>'
+ +SHURU_SPLIT.map((day,i)=>`<details style="border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px" ${i===0?'open':''}>
+  <summary style="font-size:15px;font-weight:750;cursor:pointer">Day ${i+1}｜${day.name}（${day.ex.length}種目）</summary>
+  <div style="font-size:12px;color:var(--text2);line-height:1.6;margin:10px 0">所要時間：${day.duration} ／ ${day.note}</div>
+  ${day.ex.map((ex,j)=>`<div style="border-top:1px solid var(--border);padding:11px 0">
+   <div style="font-size:13px;font-weight:750;margin-bottom:6px">${j+1}. ${ex[0]}</div>
+   <div style="font-size:12px;line-height:1.65"><b>重量：</b>${ex[1]}<div><b>回数・セット：</b>${ex[2]}</div><div><b>休憩：</b>${ex[3]}</div></div>
+   <div style="font-size:11px;color:var(--text3);line-height:1.6;margin-top:4px">ポイント：${ex[4]}</div>
+  </div>`).join('')}
+ </details>`).join('')
+ +'<div style="font-size:11px;line-height:1.6;color:var(--text3)">補足：元の動画は個人のトレーニング公開であり、万人向けの処方ではありません。特に肩や腰に痛みのある場合、動画の高負荷種目をそのまま採用しないでください。</div>';
+}
+
 let _libTab = 'score';
 function switchLibTab(tab){
   _libTab = tab;
@@ -2985,6 +3050,7 @@ function renderAeroZones(){
 function renderLib(){
   const el = document.getElementById('lib-content');
   if(!el) return;
+  if(_libTab === 'Shuru参考'){renderShuruTrainingLibrary();return;}
   if(_libTab === 'score'){
     const tiers = ['S','A','B'];
     el.innerHTML =
@@ -3910,7 +3976,7 @@ function bcGuide(){
   const weight=c.mode==='machine'?'マシン依存':c.mode==='bodyweight'?'自重':c.weight!==null&&c.weight!==undefined?c.weight+'kg':previous?previous.weight+'kg（前回実績）':'未設定';
   const grade=bcDpResult(e.n,date);
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
-  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcDpCard(e.n,idx+'-'+i,date)}<details><summary>Shuru原型・設定について</summary><div class="bc-dp-note">Shuru参考：${bcEscape(e.reps)}、${e.sets}セット（あなたの目標ではありません）</div></details></div>`;
+  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインダンベルは片手当たりの暫定候補で、肩の反応を確認し、必要ならさらに減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
  html+='<div class="bc-note" style="margin-top:12px">運動画像：<a href="https://repdb.co/" target="_blank" rel="noopener noreferrer">Exercise data by RepDB (repdb.co)</a>。画像が取得できない種目はアイコンを表示します。</div>';
