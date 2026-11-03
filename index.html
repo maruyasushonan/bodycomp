@@ -559,29 +559,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
     </div>
   </div>
 
-  <!-- ④睡眠 -->
-  <div id="sc-sleep" class="screen">
-    <div class="card">
-      <div class="card-title">昨夜</div>
-      <div class="mrow">
-        <div class="met" id="slm1"><div class="mv" id="sl-last">—</div><div class="ml">睡眠時間</div></div>
-        <div class="met"><div class="mv" id="sl-avg">—</div><div class="ml">7日間平均</div></div>
-        <div class="met" id="slm3"><div class="mv" id="sl-mps">—</div><div class="ml">MPS影響</div></div>
-      </div>
-      <div style="margin-top:4px;padding:10px;background:rgba(0,122,255,.08);border-radius:8px;font-size:13px;color:var(--blue);line-height:1.5;">
-        目標 7〜8時間 — 睡眠不足1晩で筋タンパク質合成 −18%（Lamon et al. 2021）
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">7日間推移</div>
-      <div class="sbars" id="slbars"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">記録</div>
-      <div id="sllist"></div>
-    </div>
-  </div>
-
   <!-- ⑤ライブラリ -->
   <div id="sc-lib" class="screen">
     <div class="lib-tabbar">
@@ -625,10 +602,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
   <div class="ni" data-s="food" onclick="go('food')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
     <span>栄養</span>
-  </div>
-  <div class="ni" data-s="sleep" onclick="go('sleep')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    <span>睡眠</span>
   </div>
   <div class="ni" data-s="lib" onclick="go('lib')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -2509,6 +2482,7 @@ const slColor = h => h>=7?'#34c759':h>=6?'#ff9500':'#ff3b30';
 const slMPS   = h => h>=7.5?'最適':h>=7?'良好':h>=6.5?'やや低下':h>=6?'注意':'低下';
 const slCls   = h => h>=7?'good':h>=6?'warn':'bad';
 function renderSleep(){
+  if(!document.getElementById("sc-sleep")) return; // Sleep UI removed; retain historical data.
   const recent = DB.sleep.slice(-7);
   const last = recent[recent.length-1];
   if(last){
