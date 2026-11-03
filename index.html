@@ -148,8 +148,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .day.personal{background:rgba(52,199,89,.12);color:var(--green);}
 .day.hiit{background:rgba(255,149,0,.15);color:var(--orange);}
 .day.cardio{background:rgba(90,200,250,.15);color:#5ac8fa;}
-.day.today{border:2px solid var(--blue);}
-.day.viewing{outline:2px solid var(--text2);outline-offset:-2px;}
+.day.today:not(.viewing){box-shadow:inset 0 -2px 0 var(--border);}
+.day.viewing{border:2px solid var(--blue);}
 
 /* ── Progress bar ── */
 .pbar{height:7px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:6px;}
