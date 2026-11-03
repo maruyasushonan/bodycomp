@@ -450,13 +450,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <div id="prog-card-inner"></div>
     </details>
     <div class="card">
-      <div class="card-title">実績セット数（直近7日）</div>
-      <div class="cwrap" style="height:170px;"><canvas id="volC"></canvas></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center;">実施したセットの記録から集計。目標セット数は個別調整してください。</div>
-    </div>
-    <div class="card">
-      <div class="card-title">記録</div>
-      <div id="wklist"></div>
+      <!-- Legacy targets preserved invisibly for existing renderers. -->
+      <div style="display:none" aria-hidden="true"><canvas id="volC"></canvas><div id="wklist"></div>
     </div>
   </div>
 
@@ -491,14 +486,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
   <!-- ③栄養 -->
   <div id="sc-food" class="screen">
     <div id="bc-food-mobile"><div class="bc-food-hero"><div class="bc-food-eyebrow">DAILY NUTRITION · 固定献立（概算）</div><div class="bc-food-kcal">2,197 <span>kcal / 日</span></div><div class="bc-food-hero-grid"><div><b>160<small>g</small></b><span>タンパク質</span></div><div><b>45<small>g</small></b><span>脂質</span></div><div><b>288<small>g</small></b><span>炭水化物</span></div></div></div><div class="bc-food-section-title">朝食</div><div class="bc-food-card"><div class="bc-food-head"><span>🌅 朝食</span><strong>585 kcal</strong></div><div class="bc-food-macros"><span>P 41g</span><span>F 14.6g</span><span>C 80.2g</span></div><div class="bc-food-list"><div>オートミール70g</div><div>無調整豆乳200mL</div><div>OgarMadeソイプロテイン28g</div><div>チアシード小さじ1</div><div>バナナ100g</div><div>カカオニブ小さじ1</div></div></div><div class="bc-food-section-title">昼食</div><div class="bc-food-card"><div class="bc-food-head"><span>🥗 昼食</span><strong>534 kcal</strong></div><div class="bc-food-macros"><span>P 48.2g</span><span>F 7g</span><span>C 74.1g</span></div><div class="bc-food-list"><div>千切りキャベツ</div><div>ノンオイルドレッシング</div><div>サラダチキン100g（暫定）</div><div>ミックスビーンズ50g</div><div>炊き込みご飯250g</div></div></div><div class="bc-food-section-title">夕食</div><div class="bc-food-card"><div class="bc-food-head"><span>🌙 夕食</span><strong>650 kcal</strong></div><div class="bc-food-macros"><span>P 49g</span><span>F 24.1g</span><span>C 73.9g</span></div><div class="bc-food-list"><div>銀鮭約87g（暫定）</div><div>納豆2パック</div><div>ブロッコリー約60g</div><div>しめじ約50g</div><div>炊き込みご飯250g</div></div></div><div class="bc-food-section-title">間食・トレーニング補給</div><div class="bc-food-card"><div class="bc-food-head"><span>🍌 トレーニング前</span><strong>199 kcal</strong></div><div class="bc-food-macros"><span>P 21.6g</span><span>F 1.4g</span><span>C 26g</span></div><div class="bc-food-list"><div>OgarMadeソイプロテイン28g</div><div>バナナ1本</div></div></div><div class="bc-food-card"><div class="bc-food-head"><span>💧 トレーニング中</span><strong>80 kcal</strong></div><div class="bc-food-macros"><span>P 0g</span><span>F 0g</span><span>C 20g</span></div><div class="bc-food-list"><div>マルトデキストリン20g</div></div></div><div class="bc-food-hint">※ 固定献立の暫定推定値です。食べた実績として自動記録されません。</div></div>
-    <details class="card" style="margin-top:5px;"><summary style="font-weight:700;cursor:pointer;font-size:13px;">過去の献立・買い物リスト・参考資料</summary><div class="seg-ctrl" style="margin-top:12px;">
-      <button id="tab-today" class="seg-btn active" onclick="switchFoodTab('today')">📊 今日</button>
-      <button id="tab-menu"  class="seg-btn" onclick="switchFoodTab('menu')">🍽 献立（旧案）</button>
-      <button id="tab-shop"  class="seg-btn" onclick="switchFoodTab('shop')">🛒 買い物（旧案）</button>
-      <button id="tab-shuru" class="seg-btn" onclick="switchFoodTab('shuru')">📋 Shuru参考</button>
-    </div>
-
-    </details>
+    <div style="display:none" aria-hidden="true"><button id="tab-today" class="seg-btn active"></button><button id="tab-menu" class="seg-btn"></button><button id="tab-shop" class="seg-btn"></button><button id="tab-shuru" class="seg-btn"></button></div>
 
     <!-- 今日ビュー -->
     <div id="view-today">
@@ -510,13 +498,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
         <div style="background:var(--surface2);border-radius:12px;padding:13px;margin-bottom:13px;"><div style="font-size:11px;color:var(--text3);">毎日の固定目標 · 6分割トレーニング</div><div style="font-size:26px;font-weight:800;margin:4px 0;">2,197 <span style="font-size:13px;font-weight:500;">kcal</span></div><div style="display:flex;justify-content:space-between;gap:7px;font-size:13px;font-weight:700;"><span>P 160g</span><span>F 45g</span><span>C 288g</span></div><div style="font-size:11px;color:var(--text3);margin-top:7px;">糖質288gにはトレーニング中のマルトデキストリン20gを含みます。</div></div><div id="nutr-summary"></div><button class="bc-smallbtn" style="width:100%;margin:0 0 12px;" onclick="quickAddPresetByName('マルトデキストリン20g（トレーニング中）')">＋ マルトデキストリン20gを今日の食事に追加（80kcal）</button>
         <div id="macro-bars" style="display:none;border-top:0.5px solid var(--surface2);padding-top:14px;margin-top:8px;"></div>
       </details>
-      <details style="margin-bottom:12px;" class="card"><summary style="font-size:13px;font-weight:700;cursor:pointer;">食事ごとの詳しい栄養内訳</summary><div style="margin-top:12px;"><div class="card-title" style="margin-bottom:8px;">🍽 食事ごとの内訳</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">どの食事がどの栄養素をどれだけ補っているか</div>
-        <div id="meal-breakdown"></div></div>
-      </details>
-      <details class="card"><summary style="font-size:13px;font-weight:700;cursor:pointer;">今日の食事記録を確認・編集する</summary><div style="margin-top:12px;" class="card-title">今日の食事</div>
-        <div id="mlist"></div>
-      </details>
+      <div class="card"><div class="card-title">🍽 食事ごとの詳しい栄養内訳（固定献立）</div><div style="font-size:11px;color:var(--text3);margin-bottom:12px">食事記録がなくても朝・昼・夕の栄養情報を確認できます。</div><div id="meal-breakdown"></div></div>
+      <div id="mlist" style="display:none" aria-hidden="true"></div>
     </div>
 
     <!-- Shuru動画由来の参照食事プラン。個人用の実績・目標とは分離 -->
@@ -1765,6 +1748,22 @@ const BC_DAILY_SUPPLEMENTS=[
  {name:'Life Extension Super Omega-3',morning:'',night:'2ソフトジェル',daily:'合計2粒'}
 ];
 const BC_RICE_RECIPE=['白米 150g＋もち麦 1合相当（暫定乾燥100g）','ごぼう100g／鶏もも肉（皮なし）150g／にんじん50g／しめじ80g','油揚げ約15g／乾燥ひじき3g','醤油 大さじ1.5、酒・みりん・白だし 各大さじ1、しょうが5g','炊き上がり計1,110g：250g×3＋180g×2'];
+// Scheduled fixed-menu nutrition, independent of today's recorded meals.
+function renderFixedMealBreakdown(){
+ const el=document.getElementById('meal-breakdown');if(!el)return;
+ const meals=[...BC_FIXED_MEALS,BC_FIXED_DINNER];
+ const sources=[
+  ['食物繊維、ビタミンB1、マグネシウム、鉄','タンパク質、大豆由来成分','タンパク質（製品ラベル優先）','食物繊維、α-リノレン酸','炭水化物、カリウム、ビタミンB6','ポリフェノール、マグネシウム'],
+  ['食物繊維、ビタミンK、葉酸','食塩相当量は製品ラベル確認','タンパク質、ナイアシン、ビタミンB6','食物繊維、葉酸、鉄','炭水化物、食物繊維、タンパク質'],
+  ['タンパク質、ビタミンD・B12、EPA/DHA','タンパク質、食物繊維、ビタミンK、葉酸','ビタミンC・K、葉酸、食物繊維','食物繊維、ビタミンB群','炭水化物、食物繊維、タンパク質','調理法メモ（追加の栄養なし）']
+ ];
+ el.innerHTML=meals.map((m,idx)=>`<div style="border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:750;font-size:15px"><span>${m.emoji} ${bcEscape(m.name)}</span><span>${m.kcal} kcal</span></div>
+  <div class="bc-food-macros"><span>P ${m.p}g</span><span>F ${m.f}g</span><span>C ${m.c}g</span></div>
+  <div style="font-weight:700;font-size:12px;margin:8px 0">食品別の主な栄養素</div>
+  ${m.foods.map((food,j)=>`<div style="border-top:1px solid var(--border);padding:8px 0"><div style="font-weight:600;font-size:12px">${bcEscape(food)}</div><div style="color:var(--text3);font-size:11px;margin-top:3px">${bcEscape(sources[idx][j]||'製品・分量による')}</div></div>`).join('')}
+ </div>`).join('')+'<div class="bc-food-hint">kcal・PFCは固定献立の既存概算値です。食品別の定量値やビタミン・ミネラルの含有量は、銘柄と実測量が未確定のため掲載していません。表示した栄養素は主な供給源の説明で、充足率を示すものではありません。</div>';
+}
 function bcFoodMobile(){
  const el=document.getElementById('bc-food-mobile');if(!el)return;
  const meal=BC_FIXED_MEALS,done=meal.reduce((a,m)=>({kcal:a.kcal+m.kcal,p:a.p+m.p,f:a.f+m.f,c:a.c+m.c}),{kcal:0,p:0,f:0,c:0});
@@ -1983,7 +1982,7 @@ function renderNutrition() {
   if(cLbl) cLbl.textContent = CAL_TGT;
   if(pLbl) pLbl.textContent = PROT_TGT;
 
-  renderMealBreakdown();
+  renderFixedMealBreakdown();
 }
 let _mpresetOpen = {}; // カテゴリ名 → 開閉状態（未設定＝閉じる）
 function toggleMpresetCat(cat){
