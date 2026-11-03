@@ -1720,6 +1720,7 @@ const BC_DAILY_SUPPLEMENTS=[
 ];
 const BC_RICE_RECIPE=['白米 150g＋もち麦 1合相当（暫定乾燥100g）','ごぼう100g／鶏もも肉（皮なし）150g／にんじん50g／しめじ80g','油揚げ約15g／乾燥ひじき3g','醤油 大さじ1.5、酒・みりん・白だし 各大さじ1、しょうが5g','炊き上がり計1,110g：250g×3＋180g×2'];
 // Scheduled fixed-menu nutrition, independent of today's recorded meals.
+function bcEscape(str){return String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function renderFixedMealBreakdown(){
  const el=document.getElementById('meal-breakdown');if(!el)return;
  const meals=[...BC_FIXED_MEALS,BC_FIXED_DINNER];
@@ -3921,7 +3922,7 @@ let bcGraphs=[];
 function bcIndex(date){return (new Date(date+'T12:00:00').getDay()+6)%7;}
 function bcDateOffset(date,n){let d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function bcDay(date){return BC_PARTS[bcIndex(date)];}
-function bcEscape(str){return String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 const BC_IMAGE_SLUGS={
  "バーベルベンチプレス": "bench-press",
