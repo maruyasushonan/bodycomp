@@ -389,39 +389,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <div id="checkpoint-card"></div>
     </div>
 
-    <div class="card">
-      <div class="card-title">🎯 リコンポジション シミュレーター</div>
-      <div class="sout">
-        <div class="sstat"><div class="ssv" id="s-fat">—</div><div class="ssl">落とすべき脂肪</div></div>
-        <div class="sstat"><div class="ssv" id="s-days">—</div><div class="ssl">達成日数</div></div>
-        <div class="sstat"><div class="ssv" id="s-tw">—</div><div class="ssl">目標体重</div></div>
-        <div class="sstat"><div class="ssv" id="s-score">—</div><div class="ssl">筋肉保護スコア</div></div>
-      </div>
-      <div class="slgrp">
-        <div class="sllbl"><span>目標体脂肪率</span><span class="slv" id="sv-fat">12%</span></div>
-        <input type="range" id="sl-fat" min="12" max="20" value="12" step="0.5">
-      </div>
-      <div class="slgrp">
-        <div class="sllbl"><span>1日カロリー赤字</span><span class="slv" id="sv-def">400 kcal</span></div>
-        <input type="range" id="sl-def" min="100" max="600" value="400" step="50">
-      </div>
-      <div class="slgrp" style="margin-bottom:0;">
-        <div class="sllbl"><span>タンパク質充足度</span><span class="slv" id="sv-prot">標準</span></div>
-        <input type="range" id="sl-prot" min="1" max="3" value="2" step="1">
-      </div>
-      <div class="simwarn" id="simwarn">⚠ 赤字500 kcal超は筋肉ロスのリスクがあります（研究: Murphy et al. 2022）</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">今日</div>
+    <!-- Removed home dashboard sections; compatibility targets remain hidden for legacy render calls. -->
+    <div style="display:none" aria-hidden="true">
+      <span id="s-fat"></span><span id="s-days"></span><span id="s-tw"></span><span id="s-score"></span>
+      <span id="sv-fat"></span><span id="sv-def"></span><span id="sv-prot"></span>
+      <input type="range" id="sl-fat" min="12" max="20" value="12" step="0.5">
+      <input type="range" id="sl-def" min="100" max="600" value="400" step="50">
+      <input type="range" id="sl-prot" min="1" max="3" value="2" step="1">
+      <div id="simwarn"></div>
       <div id="today-sum"></div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div class="card-title" style="margin-bottom:0;">🏃 有酸素ゾーン</div>
-        <button id="aero-edit-btn" onclick="openAeroEdit()" style="font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 0;">編集</button>
-      </div>
+      <button id="aero-edit-btn" type="button"></button>
       <div id="aero-zone-content"></div>
     </div>
   </div>
