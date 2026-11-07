@@ -3772,7 +3772,7 @@ const BC_PLAN=[
 ];
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
 // 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
-const BC_CHEST_INCLINE_DB={n:'低角度インクラインダンベルプレス（片手重量）',sets:2,reps:'15〜30度・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。片手重量を記録しRIR2〜3を優先'};
+const BC_CHEST_INCLINE_DB={n:'30°インクラインダンベルプレス（片手重量）',sets:2,reps:'ベンチ角度30°・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。片手重量を記録しRIR2〜3を優先'};
 const BC_CHEST_INCLINE_MACHINE={n:'プレートロード・インクラインプレス',sets:2,reps:'片側プレート10kg（暫定）・8〜12回',rest:'120〜150秒',extra:'初期重量は片側に載せるプレート重量（マシン自重は含まない）。空の状態から確認し、痛みなし・RIR3で調整'};
 function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='machine'?BC_CHEST_INCLINE_MACHINE:BC_CHEST_INCLINE_DB;}
 function bcSetChestIncline(choice){if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
@@ -3816,6 +3816,17 @@ const BC_ARMS_REVISED=[
  {n:'片手ケーブルプレスダウン',sets:2,reps:'表示5kg（暫定）・12〜15回/腕',rest:'90秒',extra:'左右各2セット'}
 ];
 const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_SHOULDERS_REVISED,BC_ARMS_REVISED,[]];
+// 旧名称の記録・個別重量設定を新名称へ引き継ぐ（ほかの種目は不変更）。
+const BC_OLD_INCLINE_NAME='低角度インクラインダンベルプレス（片手重量）';
+const BC_NEW_INCLINE_NAME='30°インクラインダンベルプレス（片手重量）';
+let bcInclineRenamed=false;
+DB.trainingLogs.forEach(log=>{if(log.exercise===BC_OLD_INCLINE_NAME){log.exercise=BC_NEW_INCLINE_NAME;bcInclineRenamed=true;}});
+if(DB.trainingSettings?.progression?.[BC_OLD_INCLINE_NAME]){
+ if(!DB.trainingSettings.progression[BC_NEW_INCLINE_NAME]) DB.trainingSettings.progression[BC_NEW_INCLINE_NAME]=DB.trainingSettings.progression[BC_OLD_INCLINE_NAME];
+ delete DB.trainingSettings.progression[BC_OLD_INCLINE_NAME];
+ bcInclineRenamed=true;
+}
+if(bcInclineRenamed) save();
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
@@ -3827,7 +3838,7 @@ if(!DB.trainingSettings.progression) DB.trainingSettings.progression={};
 const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key:'squat',name:'バーベルスクワット',low:120,high:125},{key:'deadlift',name:'デッドリフト',low:130,high:135}];
 const BC_DEFAULT_DP={
  'バーベルベンチプレス':{min:5,max:8,sets:3,step:2.5,rir:2,weight:80},
- '低角度インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
+ '30°インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
  'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
  'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'プレートロード・シーテッドロー':{min:8,max:12,sets:3,step:2.5,rir:2,weight:10,mode:'weight'},
@@ -3903,7 +3914,7 @@ function bcDay(date){return BC_PARTS[bcIndex(date)];}
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 const BC_IMAGE_SLUGS={
  "バーベルベンチプレス": "bench-press",
- "低角度インクラインダンベルプレス（片手重量）": "incline-db-press",
+ "30°インクラインダンベルプレス（片手重量）": "incline-db-press",
  "プレートロード・インクラインプレス": "chest-press-machine",
  "ペックデック（無痛時のみ）": "pec-deck",
  "スクワット": "squat",
