@@ -3712,6 +3712,14 @@ function launchConfetti() {
 .bc-hero .k{font-size:12px;opacity:.8;font-weight:650;letter-spacing:.04em}
 .bc-hero .name{font-size:35px;font-weight:800;margin:5px 0}
 .bc-hero .meta{font-size:13px;opacity:.9}
+
+.bc-form-target{font-size:12px;font-weight:600;color:var(--text2);margin:8px 0 0;line-height:1.5}
+.bc-form-details{margin:12px 0 9px;border:1px solid var(--border);border-radius:11px;padding:0 12px;background:var(--surface2)}
+.bc-form-details>summary{cursor:pointer;list-style-position:inside;font-size:13px;font-weight:700;padding:11px 0;color:var(--blue)}
+.bc-form-row{font-size:12px;line-height:1.65;padding:10px 0;border-top:1px solid var(--border)}
+.bc-form-row b{display:block;font-size:12px;margin-bottom:3px;color:var(--text)}
+.bc-form-row div{color:var(--text2)}
+.bc-form-caution b{color:var(--orange)}
 .bc-guide-title{font-size:13px;color:var(--text3);font-weight:700;margin:18px 2px 10px}
 .bc-mobile-ex{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:9px}
 .bc-mobile-ex .top{display:flex;gap:10px;align-items:baseline}
@@ -3943,6 +3951,158 @@ function bcExerciseThumb(name){
  const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+'-peak.webp':'';
  return '<span class="bc-thumb"><span class="bc-thumb-fallback">🏋️</span>'+(url?'<img loading="lazy" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+'</span>';
 }
+// 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
+const BC_FORM_GUIDES={
+ "バーベルベンチプレス": {
+  "target": "大胸筋（胸肋部・鎖骨部）、上腕三頭筋",
+  "setup": "目線の真上にバー、足裏を固定。肩甲骨をベンチに安定させ、手首はバーの真下。",
+  "motion": "胸の中部付近へコントロールして下ろし、前腕を概ね垂直に保って押す。",
+  "caution": "肘を真横に開き切らない。肩前面の痛み、臀部の浮き、胸への反動に注意。"
+ },
+ "30°インクラインダンベルプレス（片手重量）": {
+  "target": "大胸筋上部（鎖骨部）、三角筋前部、上腕三頭筋",
+  "setup": "ベンチ30°。手のひらを少し内側に向けた軽いハの字グリップを試す。",
+  "motion": "胸上部の左右へゆっくり下ろし、肩をすくめずに押す。",
+  "caution": "肩が痛む深さまで下ろさない。肘の過度な開きやダンベル同士の衝突を避ける。"
+ },
+ "プレートロード・インクラインプレス": {
+  "target": "大胸筋上部（鎖骨部）、三角筋前部、上腕三頭筋",
+  "setup": "シートを調整しハンドルが胸上部に来る高さに。最初は空荷で軌道確認。",
+  "motion": "背中をパッドにつけ、左右均等に押し戻す。",
+  "caution": "マシンの軌道が肩に合わず痛む場合は中止。深く引きすぎない。"
+ },
+ "ペックデック（無痛時のみ）": {
+  "target": "大胸筋（水平内転）、三角筋前部が補助",
+  "setup": "シートを調整し、肘・ハンドルを胸の高さ付近へ。",
+  "motion": "腕を体の前で寄せ、大胸筋の収縮を意識してゆっくり戻す。",
+  "caution": "肩を真横まで開くと痛む既往あり。痛む範囲を使わず、無痛でなければ省略。"
+ },
+ "スクワット": {
+  "target": "大腿四頭筋・大臀筋・内転筋群、体幹が支持",
+  "setup": "バーを安定させ、足幅とつま先の向きを無理のない位置に。腹圧をかける。",
+  "motion": "足裏全体で床を押し、骨盤と胸郭の姿勢を保ってしゃがみ、立ち上がる。",
+  "caution": "腰の丸まりや踵の浮き、膝・腰の痛みを無視して深くしゃがまない。"
+ },
+ "ブルガリアンスクワット（片手重量）": {
+  "target": "大腿四頭筋・大臀筋、内転筋群が補助",
+  "setup": "後ろ足をベンチに置き、前足を十分前へ。片手重量で記録する。",
+  "motion": "前足で床を押し、体幹と膝の向きを安定させて上下する。",
+  "caution": "後ろ脚で強く蹴らない。膝・股関節に痛みが出る深さや歩幅を避ける。"
+ },
+ "レッグカール（マシン重量）": {
+  "target": "ハムストリングス（膝屈曲筋群）",
+  "setup": "シーテッド式を想定。マシン回転軸を膝に合わせ、腿パッドと足首パッドを調整。",
+  "motion": "骨盤を座面に固定し、膝を曲げてパッドを引き、戻しを丁寧に行う。",
+  "caution": "反動で腰を反らさない。膝裏やハムストリングスに痛みがあれば負荷・可動域を変更。"
+ },
+ "カーフプレス（マシン重量）": {
+  "target": "下腿三頭筋（腓腹筋・ヒラメ筋）",
+  "setup": "レッグプレスの足台につま先側を置き、足首を安全に動かせる位置へ。",
+  "motion": "膝を概ね一定に保ち、踵を下げてから足首を伸ばす。",
+  "caution": "足先を滑らせない。膝をロックしない。アキレス腱の痛みや反動に注意。"
+ },
+ "ノーマル懸垂": {
+  "target": "広背筋・大円筋、上腕二頭筋と肩甲帯が補助",
+  "setup": "肩幅前後で握り、体幹を安定。必要ならアシスト懸垂を使う。",
+  "motion": "肩をすくめず、肘を体側へ引き下げる意識で胸をバーへ近づける。",
+  "caution": "勢いで振らない。肩に痛みが出る可動域や無理な反復は避ける。"
+ },
+ "プレートロード・シーテッドロー": {
+  "target": "広背筋・僧帽筋中部・菱形筋・三角筋後部",
+  "setup": "胸パッド・座面を合わせ、肩が無理なく前に出る位置から始める。",
+  "motion": "胸を支持したまま肘を後方へ引き、肩甲骨を自然に寄せて戻す。",
+  "caution": "腰を反らして反動を使わない。肩前面の痛みがあればグリップ・可動域を修正。"
+ },
+ "ワンハンドダンベルロウ（片手重量）": {
+  "target": "広背筋・大円筋・僧帽筋、三角筋後部",
+  "setup": "反対側の手をベンチで支え、背骨と骨盤を安定させる。",
+  "motion": "肘を腰方向へ引くイメージで上げ、肩をすくめずに下ろす。",
+  "caution": "胴体を大きくひねって持ち上げない。腰や肩に痛みが出れば軽くする。"
+ },
+ "ラットプルダウン（マシン重量）": {
+  "target": "広背筋・大円筋、上腕二頭筋",
+  "setup": "腿パッドで身体を固定し、肩が快適な幅でバーを握る。",
+  "motion": "胸の上部へ向けて肘を下げ、反動を使わず戻す。",
+  "caution": "首の後ろへ引かない。過度な後傾や肩の痛みが出る握り幅を避ける。"
+ },
+ "アブドミナルクランチ（マシン重量）": {
+  "target": "腹直筋（体幹屈曲）",
+  "setup": "座面・パッド位置を合わせ、骨盤を安定させて軽い負荷から開始。",
+  "motion": "肋骨を骨盤へ近づける意識で体幹を丸め、ゆっくり戻す。",
+  "caution": "股関節だけで曲げない。腰・腹部に鋭い痛みが出れば中止。"
+ },
+ "アブローラー（膝コロ）": {
+  "target": "腹直筋・腹斜筋（抗伸展）、広背筋等が補助",
+  "setup": "膝を床につき、手とローラーを肩の前へ。腹圧をかける。",
+  "motion": "腰を反らさず、制御できる距離だけ前へ転がして戻る。",
+  "caution": "強い腹痛の既往あり。痛みがなくても短い可動域から。腹痛・腰痛・肩痛なら中止。"
+ },
+ "パロフプレス（ケーブル重量）": {
+  "target": "内外腹斜筋を含む体幹（抗回旋）",
+  "setup": "胸の横にケーブルをセットし、マシンに対して横向きに立つ。",
+  "motion": "胸の前から両手を押し出し、胴体がケーブル側へ回らないよう保つ。",
+  "caution": "体幹をひねって押さない。肩痛がある場合は省略候補。"
+ },
+ "ラテラルレイズマシン": {
+  "target": "三角筋中部（肩の横幅）",
+  "setup": "座面とアームパッドを合わせ、肩をすくめず開始。",
+  "motion": "肘・上腕を身体の横方向へ無痛で上げ、ゆっくり下げる。",
+  "caution": "肩の痛みがある日は実施しない。勢いや首のすくめ動作を避ける。"
+ },
+ "ケーブル・ラテラルレイズ": {
+  "target": "三角筋中部（肩の横幅）",
+  "setup": "滑車を低めに調整し、片手でケーブルを持ち姿勢を安定。",
+  "motion": "肩甲面寄りの無痛な軌道で腕を外へ上げる。",
+  "caution": "肩の痛みがある日は中止。身体を傾ける反動や高すぎる挙上を避ける。"
+ },
+ "リアデルトマシン": {
+  "target": "三角筋後部、僧帽筋中部・菱形筋が補助",
+  "setup": "胸をパッドへ向け、グリップと座面を調整。",
+  "motion": "肘を軽く曲げて腕を後ろへ開き、首・肩をすくめない。",
+  "caution": "肩に痛みがある範囲へ引き切らない。腰を反らせて反動を使わない。"
+ },
+ "チェストサポート・リアレイズ": {
+  "target": "三角筋後部、肩甲帯の筋群",
+  "setup": "胸をインクラインベンチへ預け、軽いダンベルで開始。",
+  "motion": "肘を軽く曲げて腕を開き、ゆっくり下ろす。",
+  "caution": "肩前面の痛みがあれば中止。高重量で背中の反動を使わない。"
+ },
+ "ケーブル外旋": {
+  "target": "棘下筋・小円筋などローテーターカフ",
+  "setup": "肘を体側に寄せ約90°曲げ、軽いケーブル負荷を設定。",
+  "motion": "肘の位置を維持し、前腕を外へゆっくり回す。",
+  "caution": "痛みを我慢して行わない。小さな筋群なので高重量を追わない。"
+ },
+ "EZバーカール": {
+  "target": "上腕二頭筋・上腕筋、腕橈骨筋",
+  "setup": "肘を体側に置き、手首が自然なEZバーの握り位置を選ぶ。",
+  "motion": "肘を大きく前後させず曲げ、下ろす動作を制御する。",
+  "caution": "腰を反らして振らない。手首・肘・肩の痛みがあれば握り方・重量を見直す。"
+ },
+ "インクラインダンベルカール": {
+  "target": "上腕二頭筋（肩伸展位）、上腕筋",
+  "setup": "背もたれに身体を預け、肩が快適なベンチ角度で軽量から開始。",
+  "motion": "上腕を大きく動かさず肘を曲げ、ゆっくり下ろす。",
+  "caution": "肩前面に痛みが出る場合は実施しない。無理に肘を後ろへ引かない。"
+ },
+ "ケーブルプレスダウン": {
+  "target": "上腕三頭筋（外側頭・内側頭・長頭）",
+  "setup": "滑車を上に設定。肘を体側へ寄せ、手首が楽なグリップを選ぶ。",
+  "motion": "上腕の位置を保ち肘を伸ばし、戻す動作も制御する。",
+  "caution": "肩や肘を動かして振らない。肘の痛みや手首の無理な角度を避ける。"
+ },
+ "片手ケーブルプレスダウン": {
+  "target": "上腕三頭筋、左右それぞれの負荷管理",
+  "setup": "上部滑車を片手で持ち、肘を体側に寄せる。",
+  "motion": "左右同じ範囲で肘を伸ばし、反動を使わず戻す。",
+  "caution": "胴体をひねらない。左右で重量を揃えることより無痛で良いフォームを優先。"
+ }
+};
+function bcFormTarget(name){const g=BC_FORM_GUIDES[name];return g?'<div class="bc-form-target">🎯 '+bcEscape(g.target)+'</div>':'';}
+function bcFormDetails(name){const g=BC_FORM_GUIDES[name];if(!g)return '';
+ return '<details class="bc-form-details"><summary>📖 フォーム・効かせ方</summary>'+
+ [['ターゲット筋',g.target],['セットアップ',g.setup],['動作のポイント',g.motion],['NG・注意点',g.caution]].map(([label,value],i)=>'<div class="bc-form-row'+(i===3?' bc-form-caution':'')+'"><b>'+bcEscape(label)+'</b><div>'+bcEscape(value)+'</div></div>').join('')+'</details>';
+}
 function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();
  BC_BACK_REVISED[1]=bcBackRow();
@@ -3965,7 +4125,7 @@ function bcGuide(){
   const weight=c.mode==='machine'?'マシン依存':c.mode==='bodyweight'?'自重':c.weight!==null&&c.weight!==undefined?c.weight+'kg':previous?previous.weight+'kg（前回実績）':'未設定';
   const grade=bcDpResult(e.n,date);
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
-  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div><div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
+  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインダンベルは片手当たりの暫定候補で、肩の反応を確認し、必要ならさらに減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
  html+='<div class="bc-note" style="margin-top:12px">運動画像：<a href="https://repdb.co/" target="_blank" rel="noopener noreferrer">Exercise data by RepDB (repdb.co)</a>。画像が取得できない種目はアイコンを表示します。</div>';
@@ -3989,7 +4149,7 @@ function bcDraw(){
  if(idx===0||idx===4)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
  if(idx===3)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 過去にドラゴンフラッグ後の強い腹痛があったため、回復と症状を確認してから再開を判断してください。</div>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exerciseId===id);const last=DB.trainingLogs.filter(x=>x.exerciseId===id&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
- html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div><div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
+ html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(today)html+=`<button class="bc-smallbtn" style="width:100%;margin-top:10px" onclick="bcFinish()">本日のトレーニングを完了</button>`;
