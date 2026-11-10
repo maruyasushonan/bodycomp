@@ -3808,9 +3808,9 @@ const BC_LEGS_REVISED=[
  {n:'カーフプレス（マシン重量）',sets:2,reps:'40kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'レッグプレス／カーフプレス使用。表示40kgは仮設定で、マシン機構に応じて調整'}
 ];
 const BC_ABS_REVISED=[
- {n:'アブドミナルクランチ（マシン重量）',sets:3,reps:'表示15kg（暫定）×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'体幹屈曲を丁寧に。マシン初回は軽量から確認し表示重量を調整'},
- {n:'アブローラー（膝コロ）',sets:2,reps:'自重×6〜10回・可動域を短く開始',rest:'120秒',extra:'以前の強い腹痛が完全に解消している場合のみ。腰を反らさず痛みが出る前に停止'},
- {n:'パロフプレス（ケーブル重量）',sets:1,reps:'表示5kg（暫定）×10〜12回／側・RIR2〜3',rest:'60〜90秒',extra:'左右各1セット。肩に痛みがあれば省略、ケーブルの負荷は実機で調整'}
+ {n:'加重クランチ（ベンチ）',sets:3,reps:'8〜15回・RIR2／プレート重量を記録（最初は自重で確認）',rest:'90〜120秒',extra:'肋骨を骨盤へ近づけるように上体を丸める。重りは胸の前。初回は2セットまでを目安にする'},
+ {n:'シーテッド・リバースクランチ',sets:2,reps:'自重×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'ベンチに座って上体を少し後傾。膝を引き寄せる際に骨盤を軽く後傾させる。初回は1セットから'},
+ {n:'アブローラー（膝コロ）',sets:1,reps:'自重×6〜10回・RIR3〜4／短い可動域から',rest:'120秒',extra:'以前の強い腹痛と肩痛を考慮。初回は省略も可。腹部・腰・肩に痛みがあれば実施しない'}
 ];
 const BC_SHOULDER_LAT_A={n:'ラテラルレイズマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
 const BC_SHOULDER_LAT_B={n:'ケーブル・ラテラルレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒'};
@@ -3838,6 +3838,12 @@ if(DB.trainingSettings?.progression?.[BC_OLD_INCLINE_NAME]){
  bcInclineRenamed=true;
 }
 if(bcInclineRenamed) save();
+// 旧腹筋種目の履歴は保持し、新メニューと同じスロットに誤表示しない。
+DB.trainingLogs.forEach(log=>{
+ if(log.exercise==='アブドミナルクランチ（マシン重量）' || log.exercise==='パロフプレス（ケーブル重量）'){
+  if(log.exerciseId==='3-0'||log.exerciseId==='3-2') log.exerciseId='legacy-abs-'+log.exercise;
+ }
+});
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
@@ -3856,7 +3862,9 @@ const BC_DEFAULT_DP={
  'ワンハンドダンベルロウ（片手重量）':{min:8,max:12,sets:3,step:2,rir:2,weight:20,mode:'weight'},
  'ラットプルダウン（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:2,weight:35,mode:'weight'},
  'アブドミナルクランチ（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:15,mode:'weight'},
- 'アブローラー（膝コロ）':{min:6,max:10,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
+ '加重クランチ（ベンチ）':{min:8,max:15,sets:3,step:1.25,rir:2,weight:0,mode:'weight'},
+ 'シーテッド・リバースクランチ':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
+ 'アブローラー（膝コロ）':{min:6,max:10,sets:1,step:0,rir:4,weight:0,mode:'bodyweight'},
  'パロフプレス（ケーブル重量）':{min:10,max:12,sets:1,step:1,rir:3,weight:5,mode:'weight'},
  'ラテラルレイズマシン':{min:12,max:20,sets:3,step:1,rir:3,weight:5},
  'ケーブル・ラテラルレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2.5},
@@ -3876,7 +3884,7 @@ const BC_DEFAULT_DP={
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
 };
 const BC_MACHINE_NAMES=new Set(['ケーブルプレスダウン','ワンハンドケーブルプル']);
-const BC_BODYWEIGHT_NAMES=new Set(['アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
+const BC_BODYWEIGHT_NAMES=new Set(['シーテッド・リバースクランチ','アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
  try{
@@ -3945,6 +3953,8 @@ const BC_IMAGE_SLUGS={
  "プレートロード・シーテッドロー": "chest-supported-machine-row",
  "ワンハンドダンベルロウ（片手重量）": "single-arm-db-row",
  "ラットプルダウン（マシン重量）": "lat-pulldown",
+ "加重クランチ（ベンチ)": "weighted-crunch",
+ "シーテッド・リバースクランチ": "seated-knee-tuck",
  "アブドミナルクランチ（マシン重量）": "machine-seated-crunch",
  "アブローラー（膝コロ）": "ab-wheel-rollout",
  "パロフプレス（ケーブル重量）": "cable-pallof-press",
@@ -4037,6 +4047,18 @@ const BC_FORM_GUIDES={
   "motion": "胸の上部へ向けて肘を下げ、反動を使わず戻す。",
   "caution": "首の後ろへ引かない。過度な後傾や肩の痛みが出る握り幅を避ける。"
  },
+ "加重クランチ（ベンチ）": {
+  "target": "腹直筋全体。体幹屈曲による腹筋の筋肥大を重視（上部だけに限定されない）。",
+  "setup": "フラット／デクラインいずれのベンチでも上体を安全に支持。初回は自重で動作確認し、加重する場合はプレートを胸の前で保持。重量はプレート分を記録する。",
+  "motion": "股関節から大きく起き上がるのではなく、肋骨を骨盤へ近づけるように体幹をゆっくり丸める。戻す局面も制御する。",
+  "caution": "首を引っ張らない。勢いでシットアップにしない。首の後ろへ重りを置かない。腹部・腰に鋭い痛みがあれば中止。初回は少ないセット数・軽負荷で始める。"
+ },
+ "シーテッド・リバースクランチ": {
+  "target": "腹直筋全体（骨盤後傾を意識）。股関節屈筋群も働く。腹直筋下部だけを独立して鍛える種目ではない。",
+  "setup": "ベンチの端寄りに座り、上体をやや後傾させる。必要に応じて身体の横でベンチを軽く支える。膝をやや曲げる。",
+  "motion": "膝を胸に近づける際に骨盤を軽く後傾させ、下腹部を丸める意識で引き寄せる。戻すときは脚を前へ伸ばしすぎず、反動なく制御する。",
+  "caution": "脚を勢いよく前後に振るだけにしない。腰を強く反らさず、股関節前面や腹部に痛みがあれば中止。手で支えて右肩が痛む場合は省略する。"
+ },
  "アブドミナルクランチ（マシン重量）": {
   "target": "腹直筋（体幹屈曲）",
   "setup": "座面・パッド位置を合わせ、骨盤を安定させて軽い負荷から開始。",
@@ -4044,16 +4066,10 @@ const BC_FORM_GUIDES={
   "caution": "股関節だけで曲げない。腰・腹部に鋭い痛みが出れば中止。"
  },
  "アブローラー（膝コロ）": {
-  "target": "腹直筋・腹斜筋（抗伸展）、広背筋等が補助",
-  "setup": "膝を床につき、手とローラーを肩の前へ。腹圧をかける。",
-  "motion": "腰を反らさず、制御できる距離だけ前へ転がして戻る。",
-  "caution": "強い腹痛の既往あり。痛みがなくても短い可動域から。腹痛・腰痛・肩痛なら中止。"
- },
- "パロフプレス（ケーブル重量）": {
-  "target": "内外腹斜筋を含む体幹（抗回旋）",
-  "setup": "胸の横にケーブルをセットし、マシンに対して横向きに立つ。",
-  "motion": "胸の前から両手を押し出し、胴体がケーブル側へ回らないよう保つ。",
-  "caution": "体幹をひねって押さない。肩痛がある場合は省略候補。"
+  "target": "腹直筋全体・腹斜筋（抗伸展）。肩周り・広背筋も補助。",
+  "setup": "マットに膝をつき、ローラーを肩の前に置く。腹圧を入れ、お尻を軽く丸める。膝コロのみ。",
+  "motion": "腰を反らさずに短い距離から前へ転がし、体幹の位置を保ったまま戻す。肩・腹部が無痛の可動域のみ。",
+  "caution": "ドラゴンフラッグ後の非常に強い腹痛の既往と右肩痛があるため初回は省略可。反動や腰の反りを避け、腹部・腰・肩に痛みが出る場合は中止。"
  },
  "ラテラルレイズマシン": {
   "target": "三角筋中部（肩の横幅）",
