@@ -702,8 +702,11 @@ async function syncImgPull(){
 async function syncPull(){
   setSyncDot('busy');
   try{
-    const r=await fetch(SB_URL+'/rest/v1/sync_data?id=eq.'+SB_ID+'&select=payload,synced_at',{headers:sbH()});
+    const r=await fetch(SB_URL+'/rest/v1/sync_data?id=eq.'+SB_ID+'&select=payload,synced_at',{headers:sbH(),cache:'no-store'});
+    if(!r.ok)throw new Error('同期データ取得 HTTP '+r.status);
+    if(!(r.headers.get('content-type')||'').includes('json'))throw new Error('同期データ取得：JSON以外の応答');
     const data=await r.json();
+    if(!Array.isArray(data))throw new Error('同期データの形式が不正');
     if(!data.length){ syncPush(); return; }
     const rem=data[0].payload||{};
     // 体組成記録は日付単位でマージ（両デバイスのデータを保持、リモート優先）
@@ -3877,17 +3880,26 @@ const BC_BODYWEIGHT_NAMES=new Set(['アブローラー（膝コロ）','ノー�
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
  try{
-  const res=await fetch(SB_URL+'/rest/v1/sync_data?id=eq.'+SB_ID+'&select=payload',{headers:sbH(),cache:'no-store'});
-  if(!res.ok)throw new Error('同期先から取得できません（HTTP '+res.status+'）');
-  const rows=await res.json(),remote=rows[0]?.payload?.trainingSettings;
+  let res;
+  try{
+   res=await fetch(SB_URL+'/rest/v1/sync_data?id=eq.'+encodeURIComponent(SB_ID)+'&select=payload',{headers:sbH(),cache:'no-store'});
+  }catch(networkError){
+   throw new Error('クラウドに接続できません。同期サーバーの停止・ネットワーク・ブラウザのブロック設定を確認してください（通信エラー）。');
+  }
+  if(!res.ok)throw new Error('同期サーバーからHTTP '+res.status+'が返されました。権限設定やサーバー状態を確認してください。');
+  const type=res.headers.get('content-type')||'';
+  if(!type.includes('json'))throw new Error('同期サーバーからJSON以外の応答が返りました。ページを再読み込みし、再度お試しください。');
+  const rows=await res.json();
+  if(!Array.isArray(rows))throw new Error('同期サーバーのデータ形式が想定と異なります。');
+  const remote=rows[0]?.payload?.trainingSettings;
   const rp=remote?.progression;
-  if(!rp||!Object.keys(rp).length){alert('クラウドに種目別の初期重量・目標設定が見つかりません。まずPCで「目標を保存」を押し、同期の状態を確認してください。');return;}
+  if(!rp||typeof rp!=='object'||Array.isArray(rp)||!Object.keys(rp).length){alert('クラウドに種目別の初期重量・目標設定が見つかりません。PC側で「目標を保存」を押し、画面上部の同期表示が「同期済み」になったことを確認してください。');return;}
   if(!DB.trainingSettings)DB.trainingSettings={};
   DB.trainingSettings.progression={...(DB.trainingSettings.progression||{}),...rp};
   if(remote.strengthMax)DB.trainingSettings.strengthMax={...(DB.trainingSettings.strengthMax||{}),...remote.strengthMax};
   save();bcDraw();
   alert(Object.keys(rp).length+'種目の設定をクラウドから読み込みました。トレーニング画面をご確認ください。');
- }catch(err){alert('初期重量の読み込みに失敗しました：'+err.message);}
+ }catch(err){console.error('BodyComp: 初期重量のクラウド取得エラー',err);alert('初期重量の読み込みに失敗しました：'+err.message+'\\n端末内の設定・記録は変更していません。');}
 }
 function bcDpConfig(name){const c=Object.assign({min:8,max:12,sets:3,step:2.5,rir:2,weight:null},BC_DEFAULT_DP[name]||{},DB.trainingSettings.progression[name]||{});c.mode=c.mode||(BC_MACHINE_NAMES.has(name)?'machine':BC_BODYWEIGHT_NAMES.has(name)?'bodyweight':'weight');return c;}
 function bcDpModeChange(id){const select=document.getElementById('bc-dp-mode-'+id),box=document.getElementById('bc-dp-weight-wrap-'+id);if(box&&select)box.style.display=select.value==='weight'?'block':'none';}
