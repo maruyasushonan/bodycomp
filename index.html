@@ -3825,11 +3825,21 @@ function bcLegHingeChoice(){return DB.trainingSettings?.legHingeChoice==='back'?
 function bcSetLegHinge(v){if(v!=='back'&&v!=='cable')return;DB.trainingSettings.legHingeChoice=v;bcRefreshLegPlan();save();bcDraw();}
 function bcRefreshLegPlan(){const chosen=bcLegChoice()==='B'?BC_LEGS_MACHINE_B.map(e=>e.n==='ケーブルプルスルー（マシン重量）'&&bcLegHingeChoice()==='back'?BC_LEG_HINGE_BACK:e):BC_LEGS_A;BC_LEGS_REVISED.splice(0,BC_LEGS_REVISED.length,...chosen);}
 function bcSetLegMenu(v){if(v!=='A'&&v!=='B')return;DB.trainingSettings.legMenuChoice=v;bcRefreshLegPlan();save();bcDraw();}
-const BC_ABS_REVISED=[
+const BC_ABS_NORMAL=[
  {n:'加重クランチ（ベンチ）',sets:3,reps:'8〜15回・RIR2／プレート重量を記録（最初は自重で確認）',rest:'90〜120秒',extra:'肋骨を骨盤へ近づけるように上体を丸める。重りは胸の前。初回は2セットまでを目安にする'},
  {n:'シーテッド・リバースクランチ',sets:2,reps:'自重×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'ベンチに座って上体を少し後傾。膝を引き寄せる際に骨盤を軽く後傾させる。初回は1セットから'},
  {n:'アブローラー（膝コロ）',sets:1,reps:'自重×6〜10回・RIR3〜4／短い可動域から',rest:'120秒',extra:'以前の強い腹痛と肩痛を考慮。初回は省略も可。腹部・腰・肩に痛みがあれば実施しない'}
 ];
+const BC_ABS_MAT=[
+ {n:'フロアクランチ（マット・自重）',sets:3,reps:'自重×10〜20回・RIR2〜3',rest:'60〜90秒',extra:'ベンチやプレート不要。足裏をマットにつけ、肩甲骨をゆっくり浮かせて腹直筋を収縮。反動を使わない'},
+ {n:'リバースクランチ（マット）',sets:2,reps:'自重×10〜15回・RIR2〜3',rest:'60〜90秒',extra:'仰向けで膝を曲げ、脚を振り上げず骨盤を丸めて持ち上げる。腹直筋全体が働く'},
+ {n:'デッドバグ（マット）',sets:1,reps:'左右各6〜10回・姿勢を保てる範囲で実施',rest:'60〜90秒',extra:'肩が痛まない腕の位置で実施。腰を反らせず反対側の手脚をゆっくり伸ばす。ローラー不要'}
+];
+const BC_ABS_REVISED=[...BC_ABS_NORMAL];
+function bcAbsMenuChoice(){return DB.trainingSettings?.absMenuChoice==='mat'?'mat':'normal';}
+function bcRefreshAbsPlan(){BC_ABS_REVISED.splice(0,BC_ABS_REVISED.length,...(bcAbsMenuChoice()==='mat'?BC_ABS_MAT:BC_ABS_NORMAL));}
+function bcSetAbsMenu(v){if(v!=='normal'&&v!=='mat')return;DB.trainingSettings.absMenuChoice=v;bcRefreshAbsPlan();save();bcDraw();}
+
 const BC_SHOULDER_LAT_A={n:'ラテラルレイズマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
 const BC_SHOULDER_LAT_B={n:'ケーブル・ラテラルレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒'};
 const BC_SHOULDER_REAR_A={n:'リアデルトマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
@@ -3850,6 +3860,7 @@ const BC_ARMS_REVISED=[
  {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3。マシン表示重量は実機ごとに再調整'}
 ];
 bcRefreshLegPlan();
+bcRefreshAbsPlan();
 const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_SHOULDERS_REVISED,BC_ARMS_REVISED,[]];
 // 旧名称の記録・個別重量設定を新名称へ引き継ぐ（ほかの種目は不変更）。
 const BC_OLD_INCLINE_NAME='低角度インクラインダンベルプレス（片手重量）';
@@ -3888,6 +3899,9 @@ if(!DB.trainingSettings.strengthMax) DB.trainingSettings.strengthMax={bench:105,
 if(!DB.trainingSettings.progression) DB.trainingSettings.progression={};
 const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key:'squat',name:'バーベルスクワット',low:120,high:125},{key:'deadlift',name:'デッドリフト',low:130,high:135}];
 const BC_DEFAULT_DP={
+ 'フロアクランチ（マット・自重）':{min:10,max:20,sets:3,step:0,rir:3,weight:0,mode:'bodyweight'},
+ 'リバースクランチ（マット）':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
+ 'デッドバグ（マット）':{min:6,max:10,sets:1,step:0,rir:4,weight:0,mode:'bodyweight'},
  'ルーマニアンデッドリフト（バーベル）':{min:8,max:12,sets:2,step:2.5,rir:3,weight:20,mode:'weight'},
  'ケーブルプルスルー（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
  '45°バックエクステンション（自重）':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
@@ -3986,6 +4000,9 @@ function bcDay(date){return BC_PARTS[bcIndex(date)];}
 
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 const BC_IMAGE_SLUGS={
+ "フロアクランチ（マット・自重）": "crunches",
+ "リバースクランチ（マット）": "reverse-crunches",
+ "デッドバグ（マット）": "dead-bug",
  "ルーマニアンデッドリフト（バーベル）": "romanian-deadlift",
  "ケーブルプルスルー（マシン重量）": "cable-pull-through",
  "45°バックエクステンション（自重）": "back-extension",
@@ -4031,6 +4048,25 @@ function bcExerciseThumb(name){
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "フロアクランチ（マット・自重）": {
+  "target": "腹直筋（体幹の屈曲）。腹斜筋が補助。",
+  "setup": "マットに仰向けになり、膝を曲げて足を床に置く。手は胸の前か耳の横に添える。",
+  "motion": "肋骨を骨盤に近づけるよう肩甲骨をゆっくり浮かせる。戻す際も腹筋の張力を保つ。",
+  "caution": "頭を手で引っ張らない。反動で起き上がらず、強い腹痛・腰痛があれば中止。難度が軽すぎる場合は動作時間で調整。"
+ },
+ "リバースクランチ（マット）": {
+  "target": "腹直筋全体。股関節屈筋群が補助。",
+  "setup": "マットに仰向けで膝を約90°に曲げ、両手は身体の横に置く。",
+  "motion": "膝を胸へ運ぶだけでなく骨盤を軽く後傾させ、腰を少し丸めて持ち上げる。ゆっくり元に戻す。",
+  "caution": "脚を振って勢いを付けない。腰痛や腹部の異常な痛みがあれば中止。"
+ },
+ "デッドバグ（マット）": {
+  "target": "体幹の抗伸展・腹直筋と腹横筋の協調的安定。",
+  "setup": "仰向けで股関節・膝を約90°に曲げる。肩が痛まない場合だけ腕を天井へ上げる。",
+  "motion": "腰をマットへ軽く押し付け、反対側の手脚をゆっくり伸ばして戻す。左右各6〜10回を1セット。",
+  "caution": "腰が浮く場合は脚を高めに保つ。肩の痛みがあれば腕を動かさず脚だけで実施。回数より体幹姿勢を優先。"
+ },
+
  "ルーマニアンデッドリフト（バーベル）": {
   "target": "ハムストリングス・大臀筋。脊柱起立筋が姿勢を保持。",
   "setup": "脚を腰幅に開き、バーを股関節前で保持。膝は軽く曲げ、腹圧をかけて背中を中立に保つ。",
@@ -4257,6 +4293,7 @@ function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();
  bcRefreshBackPlan();
  bcRefreshLegPlan();
+ bcRefreshAbsPlan();
  bcRefreshShoulderPlan();
  const root=document.getElementById('bc-mobile-guide');if(!root)return;
  const idx=bcIndex(bcViewDate),date=bcViewDate,part=BC_PARTS[idx],items=BC_WEEKLY_PLAN[idx],isToday=date===TODAY;
@@ -4271,6 +4308,7 @@ function bcGuide(){
  if(idx===4)html+=`<div class="bc-food-card" style="padding:12px"><b>① サイドレイズ（3セット）</b><div><button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','machine')">マシン</button></div><b>② リアレイズ（3セット）</b><div><button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','machine')">マシン</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','dumbbell')">胸支持ダンベル</button></div><div class="bc-note" style="margin-top:8px">③ オーバーヘッドプレス（2セット）は肩が痛む間は行わないでください。</div><div style="margin-top:8px"><b>任意：ケーブル外旋</b> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(true)">追加</button> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(false)">外す</button></div></div>`;
  html+=`<div class="bc-guide-title">${idx===6?'日曜日は休養日です':'上から順番に実施するメニュー'}</div>`;
  if((idx===0||idx===4))html+=`<div class="bc-safety">⚠ 肩に痛みが出る種目は行わず、痛みのない代替種目に変更してください。</div>`;
+ if(idx===3)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b>Day 4｜腹筋メニュー</b><div class="bc-note" style="margin:5px 0 9px">通常：ベンチ＋腹筋ローラー／マット：ベンチ・重り・ローラー不要。いずれも計6セット。種目別の記録は保持します。</div><button class="bc-smallbtn" style="${bcAbsMenuChoice()==='normal'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('normal')">通常メニュー</button> <button class="bc-smallbtn" style="${bcAbsMenuChoice()==='mat'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('mat')">マット中心</button></div>`;
  if(idx===3)html+=`<div class="bc-safety">⚠ 過去にドラゴンフラッグ後の強い腹痛がありました。腹痛が完全に消失していない場合は腹筋運動を再開せず、症状が続く場合は医療機関に相談してください。</div>`;
  items.forEach((e,i)=>{
   const c=bcDpConfig(e.n),previous=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<date).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0))[0];
@@ -4288,6 +4326,7 @@ function bcDraw(){
  BC_CHEST_REVISED[1]=bcChestIncline();
  bcRefreshBackPlan();
  bcRefreshLegPlan();
+ bcRefreshAbsPlan();
  bcRefreshShoulderPlan();
  const idx=bcIndex(bcViewDate),items=BC_WEEKLY_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
  // Keep calendar selection synchronized with the displayed training program.
@@ -4300,6 +4339,7 @@ function bcDraw(){
  if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>④ ヒップヒンジ（2セット・どちらか一方）</b> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button><div class="bc-note">45°専用台の設置は未確認。ローバックマシンとは別の器具です。</div></div>`;
  if(idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>① 垂直プル切替（3セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice!=='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pullup')">懸垂</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice==='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pulldown')">ラットプルダウン</button><div class="bc-note">②ワンハンドダンベルロー2セット・③チェストサポーテッドロー3セットは固定。合計8セット。</div></div>`;
  if(idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>③ 胸支持ロー切替（3セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('machine')">プレートロード</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('dumbbell')">胸支持ダンベル</button><div class="bc-note">どちらか一方を実施。②のワンハンドダンベルローとは別種目です。</div></div>`;
+ if(idx===3)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>Day 4｜腹筋メニュー</b> <button class="bc-smallbtn" style="${bcAbsMenuChoice()==='normal'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('normal')">通常メニュー</button> <button class="bc-smallbtn" style="${bcAbsMenuChoice()==='mat'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('mat')">マット中心</button><div class="bc-note">マット中心はベンチ・重り・腹筋ローラー不要。どちらも6セット。選択は保存され、既存の記録は残ります。</div></div>`;
  if(idx===4)html+=`<div class="bc-cycle-info"><b>①サイド</b> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','machine')">マシン</button> <b>②リア</b> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','machine')">マシン</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','dumbbell')">胸支持DB</button> <b>外旋（任意）</b> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(true)">追加</button> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(false)">外す</button></div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
  if(idx===0||idx===4)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
