@@ -3869,6 +3869,12 @@ DB.trainingLogs.forEach(log=>{
 DB.trainingLogs.forEach(log=>{if(log.exercise==='ケーブル外旋'&&log.exerciseId==='4-2')log.exerciseId='4-3';});
 // 旧Day 6の片手プレスダウン記録は新4番目の両手プレスダウンと混同しない。
 DB.trainingLogs.forEach(log=>{if(log.exercise==='片手ケーブルプレスダウン'&&log.exerciseId==='5-3')log.exerciseId='legacy-5-3';});
+// Day 3改訂時の旧デフォルトセット数のみ更新（個別に編集した異なる値は維持）。
+if(DB.trainingSettings?.progression){
+ const p=DB.trainingSettings.progression;
+ if(p['ワンハンドダンベルロウ（片手重量）']?.sets===3)p['ワンハンドダンベルロウ（片手重量）'].sets=2;
+ if(p['ラットプルダウン（マシン重量）']?.sets===2)p['ラットプルダウン（マシン重量）'].sets=3;
+}
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
