@@ -3804,6 +3804,7 @@ const BC_BACK_REVISED=[
 const BC_LEGS_A=[
  {n:'スクワット',sets:3,reps:'87.5kg × 6〜10回・RIR2〜3',rest:'180〜240秒',extra:'初期重量87.5kgは1RM 120〜125kgを参考。動作が不安定なら減量'},
  {n:'ブルガリアンスクワット（片手重量）',sets:2,reps:'片手10kg × 8〜12回／脚・RIR2〜3',rest:'120〜180秒',extra:'暫定開始重量。左右各2セット、片手10kgずつ（合計20kg）。フォーム優先'},
+ {n:'ルーマニアンデッドリフト（バーベル）',sets:2,reps:'20kg（バー込み・フォーム確認用）×8〜12回・RIR3',rest:'120〜180秒',extra:'股関節を後ろへ引くヒップヒンジ。腰背部・ハムストリングスの疲労に注意し初回は1セットでも可'},
  {n:'レッグカール（マシン重量）',sets:3,reps:'20kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'シーテッドレッグカール（座位式）。マシンの表示重量20kgは仮設定。機種差が大きいため初回に負荷を再調整'},
  {n:'カーフプレス（マシン重量）',sets:2,reps:'40kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'レッグプレス／カーフプレス使用。表示40kgは仮設定で、マシン機構に応じて調整'}
 ];
@@ -3812,11 +3813,15 @@ const BC_LEGS_MACHINE_B=[
  {n:'45°レッグプレス（追加プレート合計重量）',sets:3,reps:'追加プレート合計40kg（暫定・スレッド自重除外）×8〜12回・RIR3',rest:'150〜180秒',extra:'初回は無負荷から確認。左右のプレートを合計して記録。スレッド重量・摩擦は機種で異なる'},
  {n:'レッグカール（マシン重量）',sets:3,reps:'表示20kg（暫定）×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'シーテッド式。Aメニューと重量設定・履歴を共用'},
  {n:'レッグエクステンション（マシン重量）',sets:2,reps:'表示15kg（暫定）×10〜15回・RIR3',rest:'90〜120秒',extra:'大腿四頭筋を狙い、反動なく動かす。膝に痛みがある場合は中止'},
+ {n:'ケーブルプルスルー（マシン重量）',sets:2,reps:'表示10kg（暫定）×10〜15回・RIR3',rest:'90〜120秒',extra:'低い滑車にロープをつけ、臀部とハムストリングスを狙う。初回は軽負荷から'},
  {n:'スタンディングカーフレイズ（追加重量）',sets:2,reps:'追加重量0kg（自重から確認）×10〜15回・RIR2〜3',rest:'90秒',extra:'立位で膝を伸ばし、かかとをゆっくり上下。加重時は追加した重量だけを記録'},
  {n:'ケーブルクランチ（マシン重量）',sets:2,reps:'表示10kg（暫定）×10〜15回・RIR3',rest:'90秒',extra:'Day4腹筋と重複するため、強い筋肉痛のある週は省略可。腰・肩が痛む場合は実施しない'}
 ];
+const BC_LEG_HINGE_BACK={n:'45°バックエクステンション（自重）',sets:2,reps:'自重・10〜15回・RIR3',rest:'90〜120秒',extra:'45°専用台がある場合の代替。股関節から上体を起こす。ローバックマシンとは別器具。初回は1セットでも可'};
 function bcLegChoice(){return DB.trainingSettings?.legMenuChoice==='B'?'B':'A';}
-function bcRefreshLegPlan(){BC_LEGS_REVISED.splice(0,BC_LEGS_REVISED.length,...(bcLegChoice()==='B'?BC_LEGS_MACHINE_B:BC_LEGS_A));}
+function bcLegHingeChoice(){return DB.trainingSettings?.legHingeChoice==='back'?'back':'cable';}
+function bcSetLegHinge(v){if(v!=='back'&&v!=='cable')return;DB.trainingSettings.legHingeChoice=v;bcRefreshLegPlan();save();bcDraw();}
+function bcRefreshLegPlan(){const chosen=bcLegChoice()==='B'?BC_LEGS_MACHINE_B.map(e=>e.n==='ケーブルプルスルー（マシン重量）'&&bcLegHingeChoice()==='back'?BC_LEG_HINGE_BACK:e):BC_LEGS_A;BC_LEGS_REVISED.splice(0,BC_LEGS_REVISED.length,...chosen);}
 function bcSetLegMenu(v){if(v!=='A'&&v!=='B')return;DB.trainingSettings.legMenuChoice=v;bcRefreshLegPlan();save();bcDraw();}
 const BC_ABS_REVISED=[
  {n:'加重クランチ（ベンチ）',sets:3,reps:'8〜15回・RIR2／プレート重量を記録（最初は自重で確認）',rest:'90〜120秒',extra:'肋骨を骨盤へ近づけるように上体を丸める。重りは胸の前。初回は2セットまでを目安にする'},
@@ -3875,6 +3880,9 @@ if(!DB.trainingSettings.strengthMax) DB.trainingSettings.strengthMax={bench:105,
 if(!DB.trainingSettings.progression) DB.trainingSettings.progression={};
 const BC_STRENGTH=[{key:'bench',name:'ベンチプレス',low:105,high:105},{key:'squat',name:'バーベルスクワット',low:120,high:125},{key:'deadlift',name:'デッドリフト',low:130,high:135}];
 const BC_DEFAULT_DP={
+ 'ルーマニアンデッドリフト（バーベル）':{min:8,max:12,sets:2,step:2.5,rir:3,weight:20,mode:'weight'},
+ 'ケーブルプルスルー（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
+ '45°バックエクステンション（自重）':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
  '45°レッグプレス（追加プレート合計重量）':{min:8,max:12,sets:3,step:10,rir:3,weight:40,mode:'weight'},
  'レッグエクステンション（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'スタンディングカーフレイズ（追加重量）':{min:10,max:15,sets:2,step:2.5,rir:3,weight:0,mode:'weight'},
@@ -3969,6 +3977,9 @@ function bcDay(date){return BC_PARTS[bcIndex(date)];}
 
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
 const BC_IMAGE_SLUGS={
+ "ルーマニアンデッドリフト（バーベル）": "romanian-deadlift",
+ "ケーブルプルスルー（マシン重量）": "cable-pull-through",
+ "45°バックエクステンション（自重）": "back-extension",
  "45°レッグプレス（追加プレート合計重量）": "leg-press",
  "レッグエクステンション（マシン重量）": "leg-extension",
  "スタンディングカーフレイズ（追加重量）": "standing-calf-raise",
@@ -4010,6 +4021,24 @@ function bcExerciseThumb(name){
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "ルーマニアンデッドリフト（バーベル）": {
+  "target": "ハムストリングス・大臀筋。脊柱起立筋が姿勢を保持。",
+  "setup": "脚を腰幅に開き、バーを股関節前で保持。膝は軽く曲げ、腹圧をかけて背中を中立に保つ。",
+  "motion": "膝角度を大きく変えず、臀部を後方へ引きながらバーを脚に沿って下ろす。もも裏の張りを感じた位置から股関節を伸ばして戻る。",
+  "caution": "20kgはフォーム確認用であり適正負荷の確定値ではない。腰を丸めない。反動で深く下ろさず、翌日の背中の疲労にも注意。"
+ },
+ "ケーブルプルスルー（マシン重量）": {
+  "target": "大臀筋・ハムストリングス。脊柱起立筋が補助。",
+  "setup": "低い滑車にロープを付け、マシンに背を向けて脚の間からロープを持つ。軽負荷から開始。",
+  "motion": "膝を軽く曲げて腰を後ろへ引き、臀部を前に押して立ち上がる。腕でロープを引かない。",
+  "caution": "腰を反らせて終えない。ケーブルに引かれて転倒しないよう立ち位置を確保。表示10kgは機種差がある暫定値。"
+ },
+ "45°バックエクステンション（自重）": {
+  "target": "股関節伸展主体なら大臀筋・ハムストリングス。脊柱起立筋も働く。",
+  "setup": "45°のバックエクステンション専用台で骨盤が動ける位置にパッドを調整。最初は自重で開始。",
+  "motion": "背中を中立に保ち股関節からゆっくり折り、臀部を使って体幹が脚と一直線になる位置まで戻す。",
+  "caution": "腰を反らして過伸展しない。画像は一般的なバックエクステンションで45°専用台と完全一致しない場合がある。ローバックマシンは代用品ではない。"
+ },
  "45°レッグプレス（追加プレート合計重量）": {
   "target": "大腿四頭筋・大臀筋・大内転筋",
   "setup": "背中と骨盤をパッドに固定し、足を肩幅付近に置く。セーフティを確認。プレート重量は左右合計で記録。",
@@ -4220,6 +4249,7 @@ function bcGuide(){
  html+=`<div style="margin:8px 0 12px"><button class="bc-smallbtn" onclick="bcImportPcWeights()">↻ PCで保存した初期重量を読み込む</button><div class="bc-note" style="margin-top:5px">PCで重量を保存して同期が完了した後、スマホで1回押してください。既存の記録は消去しません。</div></div>`;
  if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">② インクラインプレスの器具を選択</b><div class="bc-note" style="margin:5px 0 9px">ジムの空き状況に応じて切替。どちらか一方だけ2セット実施し、重量・進捗は種目別に保存します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice!=='machine'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('dumbbell')">ダンベル</button><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice==='machine'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('machine')">プレートロード</button></div></div>`;
  if(idx===1)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b>Day 2｜脚メニュー切替</b><div class="bc-note" style="margin:5px 0 9px">A：従来のスクワット中心／B：マシン中心（SHO Fitness参考）。選択は保存されます。既存のトレーニング記録は保持します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜現行メニュー</button><button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button></div></div>`;
+ if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-food-card" style="padding:12px;margin:-2px 0 12px"><b>④ 股関節伸展種目（いずれか2セット）</b><div class="bc-note" style="margin:5px 0 9px">45°バックエクステンションは専用台がある場合の代替候補です。両方は実施しません。</div><button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button></div>`;
  if(idx===2)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">② ロウイングの器具を選択</b><div class="bc-note" style="margin:5px 0 9px">どちらか一方だけ3セット実施。重量設定は器具別に独立管理します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.backRowChoice==='machine'?'background:var(--blue);color:white;':''}" onclick="bcSetBackRow('machine')">プレートロード</button><button class="bc-smallbtn" style="${DB.trainingSettings?.backRowChoice!=='machine'?'background:var(--blue);color:white;':''}" onclick="bcSetBackRow('dumbbell')">ダンベル</button></div></div>`;
  if(idx===4)html+=`<div class="bc-food-card" style="padding:12px"><b>① サイドレイズ（3セット）</b><div><button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','machine')">マシン</button></div><b>② リアレイズ（3セット）</b><div><button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','machine')">マシン</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','dumbbell')">胸支持ダンベル</button></div><div class="bc-note" style="margin-top:8px">③ オーバーヘッドプレス（2セット）は肩が痛む間は行わないでください。</div><div style="margin-top:8px"><b>任意：ケーブル外旋</b> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(true)">追加</button> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(false)">外す</button></div></div>`;
  html+=`<div class="bc-guide-title">${idx===6?'日曜日は休養日です':'上から順番に実施するメニュー'}</div>`;
@@ -4250,6 +4280,7 @@ function bcDraw(){
  html+=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">${i===6?'日':'D'+(i+1)}<br>${p}</button>`).join('')}</div>`;
  if(idx===1)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>Day 2｜脚メニュー</b> <button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜スクワット中心</button> <button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button><div class="bc-note">各種目の重量・履歴は保持。Bは脚4種目＋ケーブルクランチ。</div></div>`;
+ if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>④ ヒップヒンジ（2セット・どちらか一方）</b> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button><div class="bc-note">45°専用台の設置は未確認。ローバックマシンとは別の器具です。</div></div>`;
  if(idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>② ロウイング切替（いずれか3セット）</b> <button class="bc-smallbtn" onclick="bcSetBackRow('machine')">${DB.trainingSettings?.backRowChoice==='machine'?'✓ ':''}プレートロード</button> <button class="bc-smallbtn" onclick="bcSetBackRow('dumbbell')">${DB.trainingSettings?.backRowChoice!=='machine'?'✓ ':''}ダンベル</button></div>`;
  if(idx===4)html+=`<div class="bc-cycle-info"><b>①サイド</b> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','machine')">マシン</button> <b>②リア</b> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','machine')">マシン</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','dumbbell')">胸支持DB</button> <b>外旋（任意）</b> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(true)">追加</button> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(false)">外す</button></div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
