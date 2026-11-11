@@ -3826,10 +3826,10 @@ const BC_SHOULDERS_REVISED=[bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP];
 function bcRefreshShoulderPlan(){BC_SHOULDERS_REVISED.splice(0,BC_SHOULDERS_REVISED.length,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...(DB.trainingSettings?.shoulderExternalEnabled?[BC_SHOULDER_EXTERNAL]:[]));}
 function bcSetShoulderExternal(on){DB.trainingSettings.shoulderExternalEnabled=on;save();bcDraw();}
 const BC_ARMS_REVISED=[
- {n:'EZバーカール',sets:3,reps:'バー込み25kg（暫定）・8〜12回',rest:'120秒',extra:'RIR2〜3'},
+ {n:'EZバーカール',sets:3,reps:'バー込み25kg（暫定）・8〜12回',rest:'120秒',extra:'RIR2〜3。腰の反動を使わず実施'},
  {n:'インクラインダンベルカール',sets:2,reps:'片手8kg（暫定）・10〜15回',rest:'90〜120秒',extra:'肩に痛みがある場合は中止'},
- {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3'},
- {n:'片手ケーブルプレスダウン',sets:2,reps:'表示5kg（暫定）・12〜15回/腕',rest:'90秒',extra:'左右各2セット'}
+ {n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'},
+ {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3。マシン表示重量は実機ごとに再調整'}
 ];
 const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_ABS_REVISED,BC_SHOULDERS_REVISED,BC_ARMS_REVISED,[]];
 // 旧名称の記録・個別重量設定を新名称へ引き継ぐ（ほかの種目は不変更）。
@@ -3851,6 +3851,8 @@ DB.trainingLogs.forEach(log=>{
 });
 // 旧肩メニュー3番目のケーブル外旋は新オーバーヘッドプレスの履歴として扱わない。
 DB.trainingLogs.forEach(log=>{if(log.exercise==='ケーブル外旋'&&log.exerciseId==='4-2')log.exerciseId='4-3';});
+// 旧Day 6の片手プレスダウン記録は新4番目の両手プレスダウンと混同しない。
+DB.trainingLogs.forEach(log=>{if(log.exercise==='片手ケーブルプレスダウン'&&log.exerciseId==='5-3')log.exerciseId='legacy-5-3';});
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
@@ -3881,6 +3883,7 @@ const BC_DEFAULT_DP={
  'ケーブル・リアレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2.5},
  'オーバーヘッドプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:null},
  'EZバーカール':{min:8,max:12,sets:3,step:2.5,rir:2,weight:25},
+ 'EZバー・ライイングエクステンション':{min:8,max:12,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'インクラインダンベルカール':{min:10,max:15,sets:2,step:2,rir:3,weight:8},
  'ケーブルプレスダウン':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
  '片手ケーブルプレスダウン':{min:12,max:15,sets:2,step:1,rir:3,weight:5},
@@ -3975,6 +3978,7 @@ const BC_IMAGE_SLUGS={
  "チェストサポート・リアレイズ": "dumbbell-reverse-fly",
  "ケーブル外旋": "cable-external-rotation",
  "EZバーカール": "ez-bar-curl",
+ "EZバー・ライイングエクステンション": "ez-bar-lying-tricep-extension",
  "インクラインダンベルカール": "incline-db-curl",
  "ケーブルプレスダウン": "tricep-pushdown",
  "片手ケーブルプレスダウン": "single-arm-tricep-pushdown"
@@ -4135,6 +4139,12 @@ const BC_FORM_GUIDES={
   "setup": "背もたれに身体を預け、肩が快適なベンチ角度で軽量から開始。",
   "motion": "上腕を大きく動かさず肘を曲げ、ゆっくり下ろす。",
   "caution": "肩前面に痛みが出る場合は実施しない。無理に肘を後ろへ引かない。"
+ },
+ "EZバー・ライイングエクステンション": {
+  "target": "上腕三頭筋（長頭・外側頭・内側頭）。肩関節を屈曲した位置で長頭への伸張刺激を狙う。",
+  "setup": "フラットベンチに仰向け。手首が自然なEZバーの握り幅を選び、胸の上でバーを支える。まずバーのみで動作と肩・肘の無痛を確認。初期重量はバー込み15kgの暫定候補。",
+  "motion": "肘の位置を大きく動かさず曲げ、バーを額〜頭の後方へゆっくり下ろし、三頭筋で肘を伸ばして戻す。頭の後方へ下ろす場合は肩が痛まない範囲に限定。",
+  "caution": "右肩に痛みが残る場合は実施しない。肘・肩に鋭い痛みがある場合も中止。バーを頭へ落とさないよう補助やセーフティを検討し、反動・過度な深さ・高重量を避ける。"
  },
  "ケーブルプレスダウン": {
   "target": "上腕三頭筋（外側頭・内側頭・長頭）",
