@@ -3790,10 +3790,14 @@ const BC_CHEST_INCLINE_DB={n:'30°インクラインダンベルプレス（片�
 const BC_CHEST_INCLINE_BARBELL={n:'インクラインバーベルベンチプレス',sets:2,reps:'バー込み50kg（暫定）・6〜10回・RIR2〜3',rest:'150〜180秒',extra:'角度30°前後。肩に痛みのないグリップ・可動域を優先。バーを含む総重量を記録。初回は軽い重量で確認し、必要なら補助者やセーフティを使用'};
 function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='dumbbell'?BC_CHEST_INCLINE_DB:BC_CHEST_INCLINE_BARBELL;}
 function bcSetChestIncline(choice){if(choice!=='dumbbell'&&choice!=='barbell')return;if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
+const BC_CHEST_PEC_DECK={n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン表示15kg（暫定）・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'肩の水平内転痛の既往あり。軽い設定から確認し、痛む場合は省略。マシン表示重量は実機で調整'};
+const BC_CHEST_CABLE_FLY={n:'ケーブル・チェストフライ（ミドル・片側重量）',sets:2,reps:'片側2.5kg（暫定）・12〜15回・RIR3',rest:'90〜120秒',extra:'胸の高さで水平内転を行うケーブルフライ。大胸筋全体を刺激するが内側だけを独立して鍛える種目ではない。右肩に痛みが出れば中止'};
+function bcChestFly(){return DB.trainingSettings?.chestFlyChoice==='cable'?BC_CHEST_CABLE_FLY:BC_CHEST_PEC_DECK;}
+function bcSetChestFly(choice){if(choice!=='pecdeck'&&choice!=='cable')return;if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestFlyChoice=choice;save();bcDraw();}
 const BC_CHEST_REVISED=[
  {n:'バーベルベンチプレス',sets:3,reps:'80kg × 5〜8回 × 3セット / RIR2目安',rest:'180秒',extra:'実績：80kg×5回を3セット、最終セットも余力あり・痛みなし。翌日の肩症状が増える場合は減量'},
  bcChestIncline(),
- {n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン表示15kg（暫定）・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'肩の水平内転痛の既往あり。軽い設定から確認し、痛む場合は省略。マシン表示重量は実機で調整'}
+ bcChestFly()
 ];
 const BC_BACK_ROW_MACHINE={n:'プレートロード・シーテッドロー',sets:3,reps:'片側プレート10kg（暫定）・8〜12回・RIR2〜3',rest:'120〜180秒',extra:'チェストサポーテッドロー。片側プレート重量を記録し、胸をパッドに固定。上背部狙いでは肘をやや開く（無痛の範囲）'};
 const BC_BACK_ROW_DB={n:'ワンハンドダンベルロウ（片手重量）',sets:2,reps:'片手20kg（暫定）・8〜12回／側・RIR2〜3',rest:'120〜180秒',extra:'広背筋狙いで肘を腰方向へ。反対側の手をベンチで支持し、前日のRDLによる腰の疲労を考慮'};
@@ -3918,6 +3922,7 @@ const BC_DEFAULT_DP={
  'インクラインバーベルベンチプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:50,mode:'weight'},
  'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
  'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
+ 'ケーブル・チェストフライ（ミドル・片側重量）':{min:12,max:15,sets:2,step:1.25,rir:3,weight:2.5,mode:'weight'},
  'プレートロード・シーテッドロー':{min:8,max:12,sets:3,step:2.5,rir:2,weight:10,mode:'weight'},
  'シーテッドロー（ケーブル・マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:2,weight:25,mode:'weight'},
  'ワンハンドダンベルロウ（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:20,mode:'weight'},
@@ -4021,6 +4026,7 @@ const BC_IMAGE_SLUGS={
  "インクラインバーベルベンチプレス": "incline-bench-press",
  "プレートロード・インクラインプレス": "chest-press-machine",
  "ペックデック（無痛時のみ）": "pec-deck",
+ "ケーブル・チェストフライ（ミドル・片側重量）": "cable-chest-fly",
  "スクワット": "squat",
  "ブルガリアンスクワット（片手重量）": "bulgarian-split-squat",
  "レッグカール（マシン重量）": "seated-leg-curl",
@@ -4141,6 +4147,12 @@ const BC_FORM_GUIDES={
   "setup": "シートを調整しハンドルが胸上部に来る高さに。最初は空荷で軌道確認。",
   "motion": "背中をパッドにつけ、左右均等に押し戻す。",
   "caution": "マシンの軌道が肩に合わず痛む場合は中止。深く引きすぎない。"
+ },
+ "ケーブル・チェストフライ（ミドル・片側重量）": {
+  "target":"大胸筋全体（水平内転）。前方で手を寄せるが、胸の内側だけを独立して鍛えることはできない。",
+  "setup":"左右のプーリーを胸の高さにセット。片足を前に出し肘を軽く曲げ、肩をすくめずに保持する。ハンドルが肩の後ろへ深く引かれない位置から始め、片側の表示重量を記録する。",
+  "motion":"肘角度をほぼ一定にしたまま胸の前へ弧を描いて両手を寄せ、ゆっくり戻す。体幹を振らず大胸筋の収縮を意識する。",
+  "caution":"右肩前面や水平内転動作で痛みがある場合は無理に行わない。ケーブルでも痛みは起こり得る。初回は片側2.5kg以下・無痛の範囲で試し、痛ければ中止する。"
  },
  "ペックデック（無痛時のみ）": {
   "target": "大胸筋（水平内転）、三角筋前部が補助",
@@ -4311,7 +4323,7 @@ function bcFormDetails(name){const g=BC_FORM_GUIDES[name];if(!g)return '';
  [['ターゲット筋',g.target],['セットアップ',g.setup],['動作のポイント',g.motion],['NG・注意点',g.caution]].map(([label,value],i)=>'<div class="bc-form-row'+(i===3?' bc-form-caution':'')+'"><b>'+bcEscape(label)+'</b><div>'+bcEscape(value)+'</div></div>').join('')+'</details>';
 }
 function bcGuide(){
- BC_CHEST_REVISED[1]=bcChestIncline();
+ BC_CHEST_REVISED[1]=bcChestIncline();BC_CHEST_REVISED[2]=bcChestFly();
  bcRefreshBackPlan();
  bcRefreshLegPlan();
  bcRefreshAbsPlan();
@@ -4322,7 +4334,8 @@ function bcGuide(){
  let html=`<div class="bc-hero"><div class="k">${isToday?'今日のトレーニング':'予定メニュー'} · ${idx===6?'休養日':'DAY '+(idx+1)+' / 6'} · ${date}</div><div class="name">${bcEscape(part)}</div><div class="meta">${items.length}種目 ／ 目標約${estimated}セット　·　重量・回数は自分用設定を優先</div></div>`;
  html+=`<div style="margin:8px 0 12px"><button class="bc-smallbtn" onclick="bcImportPcWeights()">↻ PCで保存した初期重量を読み込む</button><div class="bc-note" style="margin-top:5px">PCで重量を保存して同期が完了した後、スマホで1回押してください。既存の記録は消去しません。</div></div>`;
  if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">② インクラインプレスの器具を選択</b><div class="bc-note" style="margin:5px 0 9px">肩の状態やジムの空き状況に応じて切替。どちらか一方だけ2セット実施し、重量・進捗は種目別に保存します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('dumbbell')">ダンベル</button><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('barbell')">インクラインBB</button></div></div>`;
- if(idx===1)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b>Day 2｜脚メニュー切替</b><div class="bc-note" style="margin:5px 0 9px">A：従来のスクワット中心／B：マシン中心（SHO Fitness参考）。選択は保存されます。既存のトレーニング記録は保持します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜現行メニュー</button><button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button></div></div>`;
+ if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">③ チェストフライを選択（2セット）</b><div class="bc-note" style="margin:5px 0 9px">ペックデックまたはミドルケーブルフライを選択。胸の内側だけを独立して鍛えることはできません。肩が痛ければ両方とも中止。重量・記録は別々に保存します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice!=='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('pecdeck')">ペックデック</button><button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('cable')">ケーブルフライ</button></div></div>`;
+  if(idx===1)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b>Day 2｜脚メニュー切替</b><div class="bc-note" style="margin:5px 0 9px">A：従来のスクワット中心／B：マシン中心（SHO Fitness参考）。選択は保存されます。既存のトレーニング記録は保持します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜現行メニュー</button><button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button></div></div>`;
  if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-food-card" style="padding:12px;margin:-2px 0 12px"><b>④ 股関節伸展種目（いずれか2セット）</b><div class="bc-note" style="margin:5px 0 9px">45°バックエクステンションは専用台がある場合の代替候補です。両方は実施しません。</div><button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button></div>`;
  if(idx===2)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">① 垂直プルの種目を選択（3セット）</b><div class="bc-note" style="margin:5px 0 9px">初期値は懸垂。混雑や肩の状態に応じてラットプルダウンへ変更できます。②ダンベルロー2セットは固定、③胸支持ロー3セットはマシン／ダンベルで切替可能です。④ケーブル式シーテッドロー2セットを追加し、合計10セットです。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice!=='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pullup')">懸垂</button><button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice==='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pulldown')">ラットプルダウン</button></div></div>`;
  if(idx===2)html+=`<div class="bc-food-card" style="padding:12px;margin:0 0 12px"><b style="font-size:13px">③ チェストサポーテッドロー（3セット）</b><div class="bc-note" style="margin:5px 0 9px">プレートロード式または胸支持ダンベルローから一方を選択。重量と記録は種目別です。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('machine')">プレートロード</button><button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('dumbbell')">胸支持ダンベル</button></div></div>`;
@@ -4344,7 +4357,7 @@ function bcGuide(){
  root.innerHTML=html;
 }
 function bcDraw(){
- BC_CHEST_REVISED[1]=bcChestIncline();
+ BC_CHEST_REVISED[1]=bcChestIncline();BC_CHEST_REVISED[2]=bcChestFly();
  bcRefreshBackPlan();
  bcRefreshLegPlan();
  bcRefreshAbsPlan();
@@ -4357,6 +4370,7 @@ function bcDraw(){
  html+=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">${i===6?'日':'D'+(i+1)}<br>${p}</button>`).join('')}</div>`;
  if(idx===0)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>② インクラインプレス切替（2セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('dumbbell')">30°ダンベル</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('barbell')">インクラインBB</button><div class="bc-note">肩の状態に合わせて一方を選択。使用重量と進捗はそれぞれ独立して記録します。</div></div>`;
+  if(idx===0)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>③ チェストフライ切替（2セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice!=='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('pecdeck')">ペックデック</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('cable')">ケーブルフライ</button><div class="bc-note">一方を選択。重量・記録は種目別。肩に痛みがあれば両方中止。</div></div>`;
   if(idx===1)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>Day 2｜脚メニュー</b> <button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜スクワット中心</button> <button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button><div class="bc-note">各種目の重量・履歴は保持。Bは脚4種目＋ケーブルクランチ。</div></div>`;
  if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>④ ヒップヒンジ（2セット・どちらか一方）</b> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button><div class="bc-note">45°専用台の設置は未確認。ローバックマシンとは別の器具です。</div></div>`;
  if(idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>① 垂直プル切替（3セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice!=='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pullup')">懸垂</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice==='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pulldown')">ラットプルダウン</button><div class="bc-note">②ワンハンドダンベルロー2セット・③チェストサポーテッドロー3セット・④ケーブル式シーテッドロー2セット。合計10セット。</div></div>`;
