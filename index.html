@@ -3748,7 +3748,7 @@ function launchConfetti() {
 // BodyComp v2: 2026-11-01から6日循環。原型と実績は別データで保持。
 const BC_START='2026-11-02';
 const BC_PARTS=['胸＋腹筋','脚','背中','肩','腕','休養','休養'];
-const BC_SOURCE='月:胸＋腹筋／火:脚／水:背中／木:肩／金:腕／土日:休養。肩・腕は種目やセット数を変えず1日ずつ前倒し。';
+const BC_SOURCE='月:胸＋腹筋／火:脚／水:背中＋バイク20分／木:肩＋バイク20分／金:腕＋バイク20分／土日:休養。バイクは筋トレ後・中強度で実施。';
 const BC_PLAN=[
 [{n:'インクラインベンチプレス',sets:7,reps:'106kg×4〜5回×2 / 86kg×8〜10回×3 / 56kg×限界×2',rest:'120秒（最後60秒）',extra:'準備：56kg×12回×2'},
  {n:'リバースグリップ・インクラインベンチ',sets:3,reps:'45kg×13回',rest:'90秒'},
@@ -3782,6 +3782,8 @@ const BC_PLAN=[
  {n:'サイドプル',sets:3,reps:'40kg×左右15回',rest:'120秒'}]
 ];
 if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
+// 有酸素は筋トレのセット数とは独立した実施時間（分）で記録する。
+if(!Array.isArray(DB.cardioLogs))DB.cardioLogs=[];
 // 旧プレートロード選択は新バーベル選択に読み替え、旧記録・旧種目別設定は削除しない。
 if(!DB.trainingSettings)DB.trainingSettings={};
 if(DB.trainingSettings.chestInclineChoice!=='dumbbell'&&DB.trainingSettings.chestInclineChoice!=='barbell')DB.trainingSettings.chestInclineChoice='barbell';
@@ -4010,6 +4012,13 @@ function bcDateOffset(date,n){let d=new Date(date+'T12:00:00');d.setDate(d.getDa
 function bcDay(date){return BC_PARTS[bcIndex(date)];}
 
 function bcCount(date){return DB.trainingLogs.filter(x=>x.date===date).length;}
+const BC_CARDIO_BIKE_NAME='エアロバイク（20分）';
+const BC_CARDIO_DAYS=[2,3,4]; // 水・木・金（0=月）
+function bcHasCardio(date){return BC_CARDIO_DAYS.includes(bcIndex(date));}
+function bcCardioLog(date){return DB.cardioLogs.find(x=>x.date===date&&x.exercise===BC_CARDIO_BIKE_NAME);}
+function bcWeekCardioMinutes(date){const mon=bcDateOffset(date,-bcIndex(date));return DB.cardioLogs.filter(x=>x.exercise===BC_CARDIO_BIKE_NAME&&x.date>=mon&&x.date<=bcDateOffset(mon,6)).reduce((n,x)=>n+(Number(x.minutes)||0),0);}
+function bcSaveCardio(){if(!bcHasCardio(TODAY)){alert('今日はエアロバイクの予定日ではありません');return;}const el=document.getElementById('bc-cardio-minutes'),minutes=Number(el?.value);if(!el||!Number.isInteger(minutes)||minutes<1||minutes>180){alert('実施時間を1〜180分の整数で入力してください');return;}DB.cardioLogs=DB.cardioLogs.filter(x=>!(x.date===TODAY&&x.exercise===BC_CARDIO_BIKE_NAME));DB.cardioLogs.push({date:TODAY,exercise:BC_CARDIO_BIKE_NAME,minutes,ts:Date.now()});save();bcDraw();}
+function bcCardioCard(date,mobile){if(!bcHasCardio(date))return '';const log=bcCardioLog(date),minutes=log?.minutes;const picture=bcExerciseThumb(BC_CARDIO_BIKE_NAME);const logControls=date===TODAY?'<div class="bc-logrow" style="margin-top:10px"><label class="bc-note">実施時間（分） <input id="bc-cardio-minutes" type="number" min="1" max="180" step="1" inputmode="numeric" value="'+(minutes||20)+'"></label><button class="bc-smallbtn" onclick="bcSaveCardio()">'+(log?'実施時間を更新':'＋ 有酸素を記録')+'</button></div>':'';return '<div class="'+(mobile?'bc-mobile-ex':'bc-ex')+'" style="margin-top:12px"><div class="'+(mobile?'top':'bc-ex-head')+'" style="display:flex;align-items:center;gap:10px">'+picture+'<b>筋トレ後｜エアロバイク 20分</b></div><div class="bc-note" style="margin-top:8px">目安：中強度（会話できるが歌うのは難しい程度）・RPE3〜4/10。抵抗を低〜中程度に調整し、滑らかなペダリングを維持。脚の疲労や肩の痛みに応じて軽減・中止。</div><div class="bc-cycle-info" style="margin-top:8px">予定 20分 ／ '+(log?'実績 '+minutes+'分':'未記録')+' ／ 今週 '+bcWeekCardioMinutes(date)+' / 150分（WHOの中強度目標の目安）</div>'+logControls+'</div>';}
 const BC_IMAGE_SLUGS={
  "フロアクランチ（マット・自重）": "crunches",
  "リバースクランチ（マット）": "reverse-crunches",
@@ -4026,6 +4035,7 @@ const BC_IMAGE_SLUGS={
  "インクラインバーベルベンチプレス": "incline-bench-press",
  "プレートロード・インクラインプレス": "chest-press-machine",
  "ペックデック（無痛時のみ）": "pec-deck",
+ "エアロバイク（20分）": "stationary-bike",
  "ケーブル・チェストフライ（ミドル・片側重量）": "cable-fly",
  "スクワット": "squat",
  "ブルガリアンスクワット（片手重量）": "bulgarian-split-squat",
@@ -4057,7 +4067,7 @@ const BC_IMAGE_SLUGS={
 };
 function bcExerciseThumb(name){
  const slug=BC_IMAGE_SLUGS[name];
- const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+'-peak.webp':'';
+ const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+(name===BC_CARDIO_BIKE_NAME?'-main.webp':'-peak.webp'):'';
  return '<span class="bc-thumb"><span class="bc-thumb-fallback">🏋️</span>'+(url?'<img loading="lazy" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+'</span>';
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
@@ -4352,7 +4362,8 @@ function bcGuide(){
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
   html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
- html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kg／バーベル総重量50kgを暫定候補とし、肩の反応を確認して適宜減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
+ if(bcHasCardio(date))html+=bcCardioCard(date,true);
+  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kg／バーベル総重量50kgを暫定候補とし、肩の反応を確認して適宜減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
  html+='<div class="bc-note" style="margin-top:12px">運動画像：<a href="https://repdb.co/" target="_blank" rel="noopener noreferrer">Exercise data by RepDB (repdb.co)</a>。画像が取得できない種目はアイコンを表示します。</div>';
  root.innerHTML=html;
 }
@@ -4384,7 +4395,8 @@ function bcDraw(){
  html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today&&idx!==5&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
- if(today&&idx!==5&&idx!==6)html+=`<button class="bc-smallbtn" style="width:100%;margin-top:10px" onclick="bcFinish()">本日のトレーニングを完了</button>`;
+ if(bcHasCardio(bcViewDate))html+=bcCardioCard(bcViewDate,false);
+  if(today&&idx!==5&&idx!==6)html+=`<button class="bc-smallbtn" style="width:100%;margin-top:10px" onclick="bcFinish()">本日のトレーニングを完了</button>`;
  html+=`<div class="bc-note" style="margin-top:12px">重量は実際に使用した器具の合計値を入力。自重種目は0kg。RIRは限界までの残り回数、痛みは0〜10。記録は既存のBodyCompデータとして保存されます。</div>`;
  root.innerHTML=html;
  bcGuide();
@@ -4395,7 +4407,7 @@ function bcAdd(id){if(bcIndex(TODAY)===5||bcIndex(TODAY)===6){alert('今日は�
 function bcFinish(){if(bcIndex(TODAY)===5||bcIndex(TODAY)===6){alert('今日は休養日です');return;}const num=bcCount(TODAY);if(!num){alert('少なくとも1セットの記録が必要です');return;}DB.workouts=DB.workouts.filter(x=>x.date!==TODAY);DB.workouts.push({date:TODAY,type:'self',dur:0,note:`6分割 ${bcDay(TODAY)} / ${num}セット`,part:bcDay(TODAY),sets:num});save();renderWeek();renderWklist();renderToday();bcDraw();alert('本日のトレーニングを記録しました');}
 renderWeek=function(){const root=document.getElementById('wgrid');if(!root)return;const mon=bcDateOffset(TODAY,-bcIndex(TODAY));root.innerHTML=Array.from({length:7},(_,i)=>{const ds=bcDateOffset(mon,i),part=bcDay(ds),saved=bcCount(ds)>0;return `<div class="day ${ds===TODAY?'today':''} ${ds===bcViewDate?'viewing':''} ${saved?'self':''}" data-date="${ds}" onclick="bcSelectDate('${ds}')"><div class="dname">${'月火水木金土日'[i]}</div><div class="dnum">${Number(ds.slice(-2))}</div><div class="dplan-lbl" style="font-size:10px">${part}</div>${saved?'<div class="ddot" style="background:var(--green)"></div>':''}</div>`;}).join('');};
 showDayPlan=function(idx){bcChoose(idx);};
-getTodayProg=function(){const idx=bcIndex(TODAY);return {label:(idx===5||idx===6)?'休養日':`Day ${idx+1}｜${bcDay(TODAY)}`,type:(idx===5||idx===6)?'rest':'self',blocks:[{exercises:BC_WEEKLY_PLAN[idx].map((e,i)=>({id:idx+'-'+i,name:e.n,sets:String(e.sets)}))}]};};
+getTodayProg=function(){const idx=bcIndex(TODAY);return {label:(idx===5||idx===6)?'休養日':`Day ${idx+1}｜${bcDay(TODAY)}`,type:(idx===5||idx===6)?'rest':'self',blocks:[{exercises:[...BC_WEEKLY_PLAN[idx].map((e,i)=>({id:idx+'-'+i,name:e.n,sets:String(e.sets)})),...(bcHasCardio(TODAY)?[{id:'cardio-bike',name:BC_CARDIO_BIKE_NAME,sets:'20分'}]:[])]}]};};
 renderProgram=function(){bcSelectDate(TODAY);};
 renderVol=function(){const root=document.getElementById('volC');if(!root||typeof Chart==='undefined')return;if(vChart)vChart.destroy();let days=Array.from({length:7},(_,i)=>bcDateOffset(TODAY,-i));const counts=BC_PARTS.map(p=>DB.trainingLogs.filter(x=>days.includes(x.date)&&x.part===p).length);vChart=new Chart(root,{type:'bar',data:{labels:BC_PARTS,datasets:[{data:counts,backgroundColor:'#007aff88',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});};
 function bcTrendCharts(){const root=document.getElementById('three-trends');if(!root||typeof Chart==='undefined')return;bcGraphs.forEach(c=>c.destroy());bcGraphs=[];const specs=[['fat','体脂肪率','%','#ff3b30'],['weight','体重','kg','#ff9500'],['muscle','骨格筋量','kg','#34c759']];root.innerHTML=specs.map(([k,name,u])=>`<div class="bc-trendbox"><div class="bc-trendtitle">${name}（${u}）</div><div class="cwrap" style="height:155px"><canvas id="bc-trend-${k}"></canvas></div></div>`).join('');specs.forEach(([k,name,u,color])=>{const ms=DB.measurements||[];bcGraphs.push(new Chart(document.getElementById('bc-trend-'+k),{type:'line',data:{labels:ms.map(x=>fd(x.date)),datasets:[{data:ms.map(x=>x[k]),borderColor:color,backgroundColor:color+'22',fill:true,tension:.25,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:6}},y:{ticks:{maxTicksLimit:5}}}}}));});}
