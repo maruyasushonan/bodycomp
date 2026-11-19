@@ -3706,6 +3706,7 @@ function launchConfetti() {
 .bc-logrow{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center}
 .bc-logrow input{width:66px;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 5px;color:var(--text);font-size:13px}
 .bc-smallbtn{border:0;border-radius:8px;padding:9px 11px;background:var(--blue);color:#fff;font-weight:650;font-size:12px;cursor:pointer}
+.bc-forearm-ss{display:inline-block;margin:6px 0 3px;padding:5px 9px;border-radius:7px;background:var(--surface2);border-left:3px solid var(--blue);font-size:11px;font-weight:700;color:var(--text2)}
 .bc-saved{font-size:11px;color:var(--green);line-height:1.7;margin-top:5px}
 .bc-short-video{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;margin:7px 0 2px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--blue);font-size:12px;font-weight:700;text-decoration:none}
 .bc-short-video:hover{border-color:var(--blue);background:rgba(0,122,255,.07)}
@@ -3874,7 +3875,9 @@ const BC_ARMS_REVISED=[
  {n:'インクラインダンベルカール',sets:2,reps:'片手8kg（暫定）・10〜15回',rest:'90〜120秒',extra:'肩に痛みがある場合は中止'},
  {n:'プリーチャー・ハンマーカール（片手重量）',sets:2,reps:'片手8kg（暫定）・10〜15回・RIR2〜3',rest:'90〜120秒',extra:'プリーチャーベンチに上腕を固定し、ダンベルをニュートラルグリップで持つ。上腕筋・腕橈骨筋を重視。重量は片手分を記録'},
  {n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'},
- {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3。マシン表示重量は実機ごとに再調整'}
+ {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3。マシン表示重量は実機ごとに再調整'},
+ {n:'ケーブルリストカール',sets:2,reps:'表示重量は初回設定・12〜20回・RIR2〜3',rest:'直後にリバースカール（休憩なし）',extra:'スーパーセット A1／2ラウンド。低い滑車＋ストレートバー、手のひらを上に向けて前腕をベンチに支持し、手首のみを曲げる。マシン表示重量を記録'},
+ {n:'ケーブルリバースカール',sets:2,reps:'表示重量は初回設定・10〜15回・RIR2〜3',rest:'60〜90秒（この後に次ラウンドのリストカール）',extra:'スーパーセット A2／2ラウンド。低い滑車＋ストレートバーを順手で持ち、肘を体側に固定して曲げる。手首の反らしではなく、肘関節を曲げる動作。マシン表示重量を記録'}
 ];
 bcRefreshLegPlan();
 bcRefreshAbsPlan();
@@ -3970,6 +3973,8 @@ const BC_DEFAULT_DP={
  'インクラインダンベルカール':{min:10,max:15,sets:2,step:2,rir:3,weight:8},
  'プリーチャー・ハンマーカール（片手重量）':{min:10,max:15,sets:2,step:2,rir:3,weight:8,mode:'weight'},
  'ケーブルプレスダウン':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
+ 'ケーブルリストカール':{min:12,max:20,sets:2,step:1,rir:3,weight:null,mode:'machine'},
+ 'ケーブルリバースカール':{min:10,max:15,sets:2,step:1,rir:3,weight:null,mode:'machine'},
  '片手ケーブルプレスダウン':{min:12,max:15,sets:2,step:1,rir:3,weight:5},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
  'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
@@ -4089,15 +4094,47 @@ const BC_IMAGE_SLUGS={
  "インクラインダンベルカール": "incline-db-curl",
  "プリーチャー・ハンマーカール（片手重量）": "preacher-hammer-curl",
  "ケーブルプレスダウン": "tricep-pushdown",
+ "ケーブルリストカール": "cable-wrist-curl",
  "片手ケーブルプレスダウン": "single-arm-tricep-pushdown"
 };
+function bcCableReverseCurlThumb(){
+ // ケーブル式・順手の肘屈曲を示す独自の簡易サムネイル。
+ return '<span class="bc-thumb" role="img" aria-label="ケーブルリバースカールのイラスト">'+
+ '<svg viewBox="0 0 80 80" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+ '<rect width="80" height="80" rx="12" fill="#e7f4fa"/>'+
+ '<path d="M12 9V67M6 9h12M6 67h12" fill="none" stroke="#738da2" stroke-width="3" stroke-linecap="round"/>'+
+ '<rect x="8" y="30" width="8" height="14" rx="2" fill="#537389"/>'+
+ '<circle cx="48" cy="17" r="9" fill="#e4a97b"/>'+
+ '<path d="M43 26Q36 32 38 46L40 56H56L57 38Q56 28 52 26Z" fill="#287fb0"/>'+
+ '<path d="M43 55L39 73M53 55L58 73" stroke="#263d52" stroke-width="7" stroke-linecap="round"/>'+
+ '<path d="M41 33L34 45L42 49M55 33L61 44L53 49" fill="none" stroke="#e4a97b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'+
+ '<path d="M31 48L57 48" stroke="#263d52" stroke-width="4" stroke-linecap="round"/>'+
+ '<path d="M15 37L31 48" stroke="#738da2" stroke-width="2" stroke-dasharray="3 2"/>'+
+ '<path d="M61 49Q68 39 62 33" fill="none" stroke="#f28b39" stroke-width="2" stroke-linecap="round"/>'+
+ '<path d="M59 34l4-3 2 5" fill="none" stroke="#f28b39" stroke-width="2" stroke-linejoin="round"/>'+
+ '</svg></span>';
+}
 function bcExerciseThumb(name){
+ if(name==='ケーブルリバースカール')return bcCableReverseCurlThumb();
  const slug=BC_IMAGE_SLUGS[name];
  const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+(name===BC_CARDIO_BIKE_NAME?'-main.webp':'-peak.webp'):'';
  return '<span class="bc-thumb"><span class="bc-thumb-fallback">🏋️</span>'+(url?'<img loading="lazy" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+'</span>';
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "ケーブルリストカール":{
+  "target":"前腕屈筋群（橈側手根屈筋・尺側手根屈筋など）。",
+  "setup":"ケーブル下部にストレートバーを接続。手のひらを上にして握り、ベンチまたは太腿で前腕を安定させる。手首が端から動く位置にする。",
+  "motion":"肘・前腕を固定したまま手首を曲げてバーを引き上げ、ゆっくり下ろす。A1の後は休まずA2へ移る。",
+  "caution":"反動や肘の曲げ伸ばしを使わず、軽い表示重量から動作を調整する。"
+ },
+ "ケーブルリバースカール":{
+  "target":"腕橈骨筋・上腕筋、前腕伸筋群（手首の姿勢保持）。肘屈曲種目。",
+  "setup":"ケーブル下部にストレートバーを接続し、手の甲が上になる順手で握る。肘は体側、手首は中立で固定する。",
+  "motion":"肘を曲げてバーを身体の前に引き上げ、ゆっくり下ろす。A2終了後60〜90秒休み、次のラウンドでA1へ戻る。",
+  "caution":"手首だけを反らすリバースリストカールとは別種目。手首を反らさず、肘を軸に動かす。"
+ },
+
  "インクラインスミスマシンプレス":{
   "target":"大胸筋鎖骨部（上部）・三角筋前部・上腕三頭筋。",
   "setup":"スミスマシンにインクラインベンチを約30°に置き、バーが胸上部へ下りる位置に調整する。肩と手首に負担の少ない握り幅を選び、セーフティ位置を確認する。",
@@ -4465,6 +4502,11 @@ function bcExerciseVideo(name){
  return '<a class="bc-short-video" href="'+url+'" target="_blank" rel="noopener noreferrer" aria-label="'+bcEscape(name)+'のショート動画をYouTubeで開く'+(start?'（'+start+'秒から）':'')+'">▶ フォーム動画'+time+' <span aria-hidden="true">↗</span></a>';
 }
 
+function bcSupersetLabel(name){
+ if(name==='ケーブルリストカール')return '<div class="bc-forearm-ss">SS A1 · 前腕スーパーセット 1/2 ｜ 終了後は休まずA2へ</div>';
+ if(name==='ケーブルリバースカール')return '<div class="bc-forearm-ss">SS A2 · 前腕スーパーセット 2/2 ｜ 終了後60〜90秒休憩</div>';
+ return '';
+}
 function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();BC_CHEST_REVISED[2]=bcChestFly();
  bcRefreshBackPlan();
@@ -4483,7 +4525,7 @@ function bcGuide(){
   const weight=c.mode==='machine'?'マシン依存':c.mode==='bodyweight'?'自重':c.weight!==null&&c.weight!==undefined?c.weight+'kg':previous?previous.weight+'kg（前回実績）':'未設定';
   const grade=bcDpResult(e.n,date);
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
-  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
+  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcSupersetLabel(e.n)}${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
  if(bcHasCardio(date))html+=bcCardioCard(date,true);
   html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kgを暫定候補とし、スミスマシンは実機のバー重量が異なるため初期重量を未設定にしています。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
@@ -4505,7 +4547,7 @@ function bcDraw(){
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">${(i===5||i===6)?'休':'D'+(i+1)}<br>${p}</button>`).join('')}</div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exercise===e.n);const last=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
- html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
+ html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcSupersetLabel(e.n)}${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today&&idx!==5&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(bcHasCardio(bcViewDate))html+=bcCardioCard(bcViewDate,false);
