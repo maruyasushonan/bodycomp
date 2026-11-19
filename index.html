@@ -4332,6 +4332,57 @@ function bcFormDetails(name){const g=BC_FORM_GUIDES[name];if(!g)return '';
  return '<details class="bc-form-details"><summary>📖 フォーム・効かせ方</summary>'+
  [['ターゲット筋',g.target],['セットアップ',g.setup],['動作のポイント',g.motion],['NG・注意点',g.caution]].map(([label,value],i)=>'<div class="bc-form-row'+(i===3?' bc-form-caution':'')+'"><b>'+bcEscape(label)+'</b><div>'+bcEscape(value)+'</div></div>').join('')+'</details>';
 }
+
+function bcCardSwitch(label,options){
+ const buttons=options.map(o=>'<button type="button" class="bc-smallbtn" aria-pressed="'+(o.selected?'true':'false')+'" style="padding:5px 9px;margin:0;font-size:12px;min-height:30px;'+(o.selected?'background:var(--blue);color:white;':'')+'" onclick="'+o.action+'">'+bcEscape(o.label)+'</button>').join('');
+ return '<div class="bc-card-switch" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:9px 0;padding:8px 9px;background:var(--surface2);border-radius:9px"><span style="font-size:11px;font-weight:600;white-space:nowrap">'+bcEscape(label)+'</span><div role="group" aria-label="'+bcEscape(label)+'" style="display:flex;gap:5px;flex-wrap:wrap">'+buttons+'</div></div>';
+}
+function bcExerciseSwitches(day,i){
+ const o=(label,selected,action)=>({label,selected,action});
+ if(day===0&&i===1)return bcCardSwitch('器具',[
+  o('30°DB',DB.trainingSettings?.chestInclineChoice==='dumbbell',"bcSetChestIncline('dumbbell')"),
+  o('BB',DB.trainingSettings?.chestInclineChoice!=='dumbbell',"bcSetChestIncline('barbell')")
+ ]);
+ if(day===0&&i===2)return bcCardSwitch('フライ',[
+  o('ペックデック',DB.trainingSettings?.chestFlyChoice!=='cable',"bcSetChestFly('pecdeck')"),
+  o('ケーブル',DB.trainingSettings?.chestFlyChoice==='cable',"bcSetChestFly('cable')")
+ ]);
+ if(day===0&&i===3)return bcCardSwitch('腹筋メニュー',[
+  o('通常',bcAbsMenuChoice()==='normal',"bcSetAbsMenu('normal')"),
+  o('マット',bcAbsMenuChoice()==='mat',"bcSetAbsMenu('mat')")
+ ]);
+ if(day===1&&i===0)return bcCardSwitch('脚メニュー',[
+  o('A スクワット',bcLegChoice()==='A',"bcSetLegMenu('A')"),
+  o('B マシン',bcLegChoice()==='B',"bcSetLegMenu('B')")
+ ]);
+ if(day===1&&bcLegChoice()==='B'&&i===3)return bcCardSwitch('股関節伸展',[
+  o('ケーブル',bcLegHingeChoice()==='cable',"bcSetLegHinge('cable')"),
+  o('45°バックEX',bcLegHingeChoice()==='back',"bcSetLegHinge('back')")
+ ]);
+ if(day===2&&i===0)return bcCardSwitch('垂直プル',[
+  o('懸垂',DB.trainingSettings?.backVerticalChoice!=='pulldown',"bcSetBackVertical('pullup')"),
+  o('ラットプル',DB.trainingSettings?.backVerticalChoice==='pulldown',"bcSetBackVertical('pulldown')")
+ ]);
+ if(day===2&&i===2)return bcCardSwitch('胸支持ロー',[
+  o('マシン',DB.trainingSettings?.backChestRowChoice!=='dumbbell',"bcSetBackChestRow('machine')"),
+  o('DB',DB.trainingSettings?.backChestRowChoice==='dumbbell',"bcSetBackChestRow('dumbbell')")
+ ]);
+ if(day===3&&i===0)return bcCardSwitch('サイド',[
+  o('ケーブル',DB.trainingSettings?.shoulderLatChoice!=='machine',"bcSetShoulderChoice('lat','cable')"),
+  o('マシン',DB.trainingSettings?.shoulderLatChoice==='machine',"bcSetShoulderChoice('lat','machine')")
+ ]);
+ if(day===3&&i===1)return bcCardSwitch('リア',[
+  o('ケーブル',!['machine','dumbbell'].includes(DB.trainingSettings?.shoulderRearChoice),"bcSetShoulderChoice('rear','cable')"),
+  o('マシン',DB.trainingSettings?.shoulderRearChoice==='machine',"bcSetShoulderChoice('rear','machine')"),
+  o('胸支持DB',DB.trainingSettings?.shoulderRearChoice==='dumbbell',"bcSetShoulderChoice('rear','dumbbell')")
+ ]);
+ if(day===3&&i===2)return bcCardSwitch('任意：外旋',[
+  o('追加',!!DB.trainingSettings?.shoulderExternalEnabled,'bcSetShoulderExternal(true)'),
+  o('外す',!DB.trainingSettings?.shoulderExternalEnabled,'bcSetShoulderExternal(false)')
+ ]);
+ return '';
+}
+
 function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();BC_CHEST_REVISED[2]=bcChestFly();
  bcRefreshBackPlan();
@@ -4343,16 +4394,8 @@ function bcGuide(){
  const estimated=items.reduce((n,x)=>n+bcDpConfig(x.n).sets,0);
  let html=`<div class="bc-hero"><div class="k">${isToday?'今日のトレーニング':'予定メニュー'} · ${(idx===5||idx===6)?'休養日':'DAY '+(idx+1)+' / 6'} · ${date}</div><div class="name">${bcEscape(part)}</div><div class="meta">${items.length}種目 ／ 目標約${estimated}セット　·　重量・回数は自分用設定を優先</div></div>`;
  html+=`<div style="margin:8px 0 12px"><button class="bc-smallbtn" onclick="bcImportPcWeights()">↻ PCで保存した初期重量を読み込む</button><div class="bc-note" style="margin-top:5px">PCで重量を保存して同期が完了した後、スマホで1回押してください。既存の記録は消去しません。</div></div>`;
- if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">② インクラインプレスの器具を選択</b><div class="bc-note" style="margin:5px 0 9px">肩の状態やジムの空き状況に応じて切替。どちらか一方だけ2セット実施し、重量・進捗は種目別に保存します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('dumbbell')">ダンベル</button><button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('barbell')">インクラインBB</button></div></div>`;
- if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">③ チェストフライを選択（2セット）</b><div class="bc-note" style="margin:5px 0 9px">ペックデックまたはミドルケーブルフライを選択。胸の内側だけを独立して鍛えることはできません。肩が痛ければ両方とも中止。重量・記録は別々に保存します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice!=='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('pecdeck')">ペックデック</button><button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('cable')">ケーブルフライ</button></div></div>`;
-  if(idx===1)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b>Day 2｜脚メニュー切替</b><div class="bc-note" style="margin:5px 0 9px">A：従来のスクワット中心／B：マシン中心（SHO Fitness参考）。選択は保存されます。既存のトレーニング記録は保持します。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜現行メニュー</button><button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button></div></div>`;
- if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-food-card" style="padding:12px;margin:-2px 0 12px"><b>④ 股関節伸展種目（いずれか2セット）</b><div class="bc-note" style="margin:5px 0 9px">45°バックエクステンションは専用台がある場合の代替候補です。両方は実施しません。</div><button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button></div>`;
- if(idx===2)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b style="font-size:13px">① 垂直プルの種目を選択（3セット）</b><div class="bc-note" style="margin:5px 0 9px">初期値は懸垂。混雑や肩の状態に応じてラットプルダウンへ変更できます。②ダンベルロー2セットは固定、③胸支持ロー3セットはマシン／ダンベルで切替可能です。④ケーブル式シーテッドロー2セットを追加し、合計10セットです。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice!=='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pullup')">懸垂</button><button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice==='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pulldown')">ラットプルダウン</button></div></div>`;
- if(idx===2)html+=`<div class="bc-food-card" style="padding:12px;margin:0 0 12px"><b style="font-size:13px">③ チェストサポーテッドロー（3セット）</b><div class="bc-note" style="margin:5px 0 9px">プレートロード式または胸支持ダンベルローから一方を選択。重量と記録は種目別です。</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('machine')">プレートロード</button><button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('dumbbell')">胸支持ダンベル</button></div></div>`;
- if(idx===3)html+=`<div class="bc-food-card" style="padding:12px"><b>① サイドレイズ（3セット）</b><div><button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','machine')">マシン</button></div><b>② リアレイズ（3セット）</b><div><button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','machine')">マシン</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','dumbbell')">胸支持ダンベル</button></div><div class="bc-note" style="margin-top:8px">③ オーバーヘッドプレス（2セット）は肩が痛む間は行わないでください。</div><div style="margin-top:8px"><b>任意：ケーブル外旋</b> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(true)">追加</button> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(false)">外す</button></div></div>`;
  html+=`<div class="bc-guide-title">${(idx===5||idx===6)?'今日は休養日です':'上から順番に実施するメニュー'}</div>`;
  if((idx===0||idx===3))html+=`<div class="bc-safety">⚠ 肩に痛みが出る種目は行わず、痛みのない代替種目に変更してください。</div>`;
- if(idx===0)html+=`<div class="bc-food-card" style="padding:12px;margin:10px 0"><b>④〜⑥｜腹筋メニュー（胸の後）</b><div class="bc-note" style="margin:5px 0 9px">胸の3種目を終えてから実施。通常：ベンチ＋腹筋ローラー／マット：ベンチ・重り不要、腹筋ローラーは必要。いずれも計6セット。種目別の記録は保持します。</div><button class="bc-smallbtn" style="${bcAbsMenuChoice()==='normal'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('normal')">通常メニュー</button> <button class="bc-smallbtn" style="${bcAbsMenuChoice()==='mat'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('mat')">マット中心</button></div>`;
  if(idx===0)html+=`<div class="bc-safety">⚠ 胸の後に腹筋を行います。翌日のスクワットに体幹の疲労を残さないよう注意し、肩・腹部に痛みが出る種目は中止してください。</div>`;
  items.forEach((e,i)=>{
   const c=bcDpConfig(e.n),previous=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<date).sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0))[0];
@@ -4360,7 +4403,7 @@ function bcGuide(){
   const weight=c.mode==='machine'?'マシン依存':c.mode==='bodyweight'?'自重':c.weight!==null&&c.weight!==undefined?c.weight+'kg':previous?previous.weight+'kg（前回実績）':'未設定';
   const grade=bcDpResult(e.n,date);
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
-  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
+  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
  if(bcHasCardio(date))html+=bcCardioCard(date,true);
   html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kg／バーベル総重量50kgを暫定候補とし、肩の反応を確認して適宜減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
@@ -4380,19 +4423,11 @@ function bcDraw(){
  let html=`<div style="background:var(--surface2);padding:12px;border-radius:12px;margin-bottom:12px;"><b>筋力基準（1RM）</b><div class="bc-note">1回だけ挙上できる限度。参考値はベンチ105kg、スクワット120〜125kg、デッドリフト130〜135kg。以下は代表値で編集可能。デッドリフトは現行6分割には未追加。</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px;">${BC_STRENGTH.map(t=>`<label style="font-size:10px;">${t.name}<input id="bc-max-${t.key}" type="number" step="0.5" min="1" value="${DB.trainingSettings.strengthMax[t.key]}" style="width:100%;min-width:0;padding:6px;"><button class="bc-smallbtn" style="margin-top:5px;" onclick="bcSaveMax('${t.key}')">保存</button></label>`).join('')}</div></div>`;
  html+=`<div class="bc-cycle-summary"><div class="bc-cycle-title">Day ${idx+1} · ${BC_PARTS[idx]}</div><div class="bc-cycle-info">${bcViewDate}｜${items.length}種目・標準${items.reduce((s,e)=>s+e.sets,0)}セット｜記録済み ${bcCount(bcViewDate)}セット</div><div class="bc-note">${bcEscape(BC_SOURCE)}</div></div>`;
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">${(i===5||i===6)?'休':'D'+(i+1)}<br>${p}</button>`).join('')}</div>`;
- if(idx===0)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>② インクラインプレス切替（2セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('dumbbell')">30°ダンベル</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestInclineChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetChestIncline('barbell')">インクラインBB</button><div class="bc-note">肩の状態に合わせて一方を選択。使用重量と進捗はそれぞれ独立して記録します。</div></div>`;
-  if(idx===0)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>③ チェストフライ切替（2セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice!=='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('pecdeck')">ペックデック</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.chestFlyChoice==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetChestFly('cable')">ケーブルフライ</button><div class="bc-note">一方を選択。重量・記録は種目別。肩に痛みがあれば両方中止。</div></div>`;
-  if(idx===1)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>Day 2｜脚メニュー</b> <button class="bc-smallbtn" style="${bcLegChoice()==='A'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('A')">A｜スクワット中心</button> <button class="bc-smallbtn" style="${bcLegChoice()==='B'?'background:var(--blue);color:white;':''}" onclick="bcSetLegMenu('B')">B｜マシン中心</button><div class="bc-note">各種目の重量・履歴は保持。Bは脚4種目＋ケーブルクランチ。</div></div>`;
- if(idx===1&&bcLegChoice()==='B')html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>④ ヒップヒンジ（2セット・どちらか一方）</b> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='cable'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('cable')">ケーブルプルスルー</button> <button class="bc-smallbtn" style="${bcLegHingeChoice()==='back'?'background:var(--blue);color:white;':''}" onclick="bcSetLegHinge('back')">45°バックEX</button><div class="bc-note">45°専用台の設置は未確認。ローバックマシンとは別の器具です。</div></div>`;
- if(idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>① 垂直プル切替（3セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice!=='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pullup')">懸垂</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.backVerticalChoice==='pulldown'?'background:var(--blue);color:white;':''}" onclick="bcSetBackVertical('pulldown')">ラットプルダウン</button><div class="bc-note">②ワンハンドダンベルロー2セット・③チェストサポーテッドロー3セット・④ケーブル式シーテッドロー2セット。合計10セット。</div></div>`;
- if(idx===2)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>③ 胸支持ロー切替（3セット）</b> <button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice!=='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('machine')">プレートロード</button> <button class="bc-smallbtn" style="${DB.trainingSettings?.backChestRowChoice==='dumbbell'?'background:var(--blue);color:white;':''}" onclick="bcSetBackChestRow('dumbbell')">胸支持ダンベル</button><div class="bc-note">どちらか一方を実施。②のワンハンドダンベルローとは別種目です。</div></div>`;
- if(idx===0)html+=`<div class="bc-cycle-info" style="padding:10px;margin-bottom:12px"><b>④〜⑥｜胸の後の腹筋メニュー</b> <button class="bc-smallbtn" style="${bcAbsMenuChoice()==='normal'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('normal')">通常メニュー</button> <button class="bc-smallbtn" style="${bcAbsMenuChoice()==='mat'?'background:var(--blue);color:white;':''}" onclick="bcSetAbsMenu('mat')">マット中心</button><div class="bc-note">胸の種目をすべて終えてから実施。マット中心はベンチ・重り不要ですが、膝コロ用の腹筋ローラーが必要です。どちらも6セット。選択は保存され、既存の記録は残ります。</div></div>`;
- if(idx===3)html+=`<div class="bc-cycle-info"><b>①サイド</b> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('lat','machine')">マシン</button> <b>②リア</b> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','cable')">ケーブル</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','machine')">マシン</button> <button class="bc-smallbtn" onclick="bcSetShoulderChoice('rear','dumbbell')">胸支持DB</button> <b>外旋（任意）</b> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(true)">追加</button> <button class="bc-smallbtn" onclick="bcSetShoulderExternal(false)">外す</button></div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
  if(idx===0||idx===3)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 右肩の痛みがある種目は実施しないでください。原型を掲載していますが、運動処方ではありません。</div>`;
  if(idx===0)html+=`<div class="bc-cycle-info" style="padding:10px;background:rgba(255,149,0,.11);border-radius:9px;margin-bottom:12px">⚠ 胸の後に腹筋を実施。翌日のスクワットに腹部疲労が残る場合は負荷を調整。肩や腹部に痛みがあれば中止してください。</div>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exercise===e.n);const last=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
- html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
+ html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today&&idx!==5&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(bcHasCardio(bcViewDate))html+=bcCardioCard(bcViewDate,false);
