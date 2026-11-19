@@ -3870,17 +3870,23 @@ const BC_SHOULDER_EXTERNAL={n:'ケーブル外旋',sets:2,reps:'表示1kg（暫�
 const BC_SHOULDERS_REVISED=[bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP];
 function bcRefreshShoulderPlan(){BC_SHOULDERS_REVISED.splice(0,BC_SHOULDERS_REVISED.length,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...(DB.trainingSettings?.shoulderExternalEnabled?[BC_SHOULDER_EXTERNAL]:[]));}
 function bcSetShoulderExternal(on){DB.trainingSettings.shoulderExternalEnabled=on;save();bcDraw();}
+const BC_ARM_LYING_EXTENSION={n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'};
+const BC_ARM_CABLE_FRENCH={n:'ケーブル・フレンチプレス',sets:2,reps:'マシン表示重量は実機で設定・10〜15回・RIR2〜3',rest:'90〜120秒',extra:'ケーブル上腕三頭筋オーバーヘッドエクステンション。上部滑車のロープを背にして頭上へ伸ばす。重量はマシン表示値で記録'};
+function bcArmExtension(){return DB.trainingSettings?.armExtensionChoice==='cable'?BC_ARM_CABLE_FRENCH:BC_ARM_LYING_EXTENSION;}
+function bcSetArmExtension(choice){if(choice!=='ez'&&choice!=='cable')return;if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.armExtensionChoice=choice;bcRefreshArmPlan();save();bcDraw();}
+function bcRefreshArmPlan(){BC_ARMS_REVISED[3]=bcArmExtension();}
 const BC_ARMS_REVISED=[
  {n:'EZバーカール',sets:3,reps:'バー込み25kg（暫定）・8〜12回',rest:'120秒',extra:'RIR2〜3。腰の反動を使わず実施'},
  {n:'インクラインダンベルカール',sets:2,reps:'片手8kg（暫定）・10〜15回',rest:'90〜120秒',extra:'肩に痛みがある場合は中止'},
  {n:'プリーチャー・ハンマーカール（片手重量）',sets:2,reps:'片手8kg（暫定）・10〜15回・RIR2〜3',rest:'90〜120秒',extra:'プリーチャーベンチに上腕を固定し、ダンベルをニュートラルグリップで持つ。上腕筋・腕橈骨筋を重視。重量は片手分を記録'},
- {n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'},
+ bcArmExtension(),
  {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3。マシン表示重量は実機ごとに再調整'},
  {n:'ケーブルリストカール',sets:2,reps:'表示重量は初回設定・12〜20回・RIR2〜3',rest:'直後にリバースカール（休憩なし）',extra:'スーパーセット A1／2ラウンド。低い滑車＋ストレートバー、手のひらを上に向けて前腕をベンチに支持し、手首のみを曲げる。マシン表示重量を記録'},
  {n:'ケーブルリバースカール',sets:2,reps:'表示重量は初回設定・10〜15回・RIR2〜3',rest:'60〜90秒（この後に次ラウンドのリストカール）',extra:'スーパーセット A2／2ラウンド。低い滑車＋ストレートバーを順手で持ち、肘を体側に固定して曲げる。手首の反らしではなく、肘関節を曲げる動作。マシン表示重量を記録'}
 ];
 bcRefreshLegPlan();
 bcRefreshAbsPlan();
+bcRefreshArmPlan();
 const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_SHOULDERS_REVISED,BC_ARMS_REVISED,[],[]];
 // 旧名称の記録・個別重量設定を新名称へ引き継ぐ（ほかの種目は不変更）。
 const BC_OLD_INCLINE_NAME='低角度インクラインダンベルプレス（片手重量）';
@@ -3970,6 +3976,7 @@ const BC_DEFAULT_DP={
  'オーバーヘッドプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:null},
  'EZバーカール':{min:8,max:12,sets:3,step:2.5,rir:2,weight:25},
  'EZバー・ライイングエクステンション':{min:8,max:12,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
+ 'ケーブル・フレンチプレス':{min:10,max:15,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
  'インクラインダンベルカール':{min:10,max:15,sets:2,step:2,rir:3,weight:8},
  'プリーチャー・ハンマーカール（片手重量）':{min:10,max:15,sets:2,step:2,rir:3,weight:8,mode:'weight'},
  'ケーブルプレスダウン':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
@@ -4091,6 +4098,7 @@ const BC_IMAGE_SLUGS={
  "ケーブル外旋": "cable-external-rotation",
  "EZバーカール": "ez-bar-curl",
  "EZバー・ライイングエクステンション": "ez-bar-lying-tricep-extension",
+ "ケーブル・フレンチプレス": "cable-overhead-tricep-extension",
  "インクラインダンベルカール": "incline-db-curl",
  "プリーチャー・ハンマーカール（片手重量）": "preacher-hammer-curl",
  "ケーブルプレスダウン": "tricep-pushdown",
@@ -4122,6 +4130,13 @@ function bcExerciseThumb(name){
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "ケーブル・フレンチプレス":{
+  "target":"上腕三頭筋（特に長頭を伸張位で刺激）。外側頭・内側頭も働く。",
+  "setup":"上部滑車にロープを取り付け、マシンに背を向けてロープを頭の後ろで握る。片脚を前に出して体幹を安定させ、肘を上方に向ける。重量はケーブルマシンの表示値で記録する。",
+  "motion":"上腕の位置を大きく動かさず肘を伸ばし、ロープを頭の前上方へ押し出す。肘をゆっくり曲げて頭の後ろへ戻す。",
+  "caution":"腰を反らさず、肘の開きや体幹の反動を抑える。マシンごとに負荷が異なるので初回の設定重量は実機で調整する。"
+ },
+
  "ケーブルリストカール":{
   "target":"前腕屈筋群（橈側手根屈筋・尺側手根屈筋など）。",
   "setup":"ケーブル下部にストレートバーを接続。手のひらを上にして握り、ベンチまたは太腿で前腕を安定させる。手首が端から動く位置にする。",
@@ -4453,6 +4468,10 @@ function bcExerciseSwitches(day,i){
   o('マシン',DB.trainingSettings?.shoulderRearChoice==='machine',"bcSetShoulderChoice('rear','machine')"),
   o('胸支持DB',DB.trainingSettings?.shoulderRearChoice==='dumbbell',"bcSetShoulderChoice('rear','dumbbell')")
  ]);
+ if(day===4&&i===3)return bcCardSwitch('三頭筋種目',[
+  o('EZバー',DB.trainingSettings?.armExtensionChoice!=='cable',"bcSetArmExtension('ez')"),
+  o('ケーブル',DB.trainingSettings?.armExtensionChoice==='cable',"bcSetArmExtension('cable')")
+ ]);
  if(day===3&&i===2)return bcCardSwitch('任意：外旋',[
   o('追加',!!DB.trainingSettings?.shoulderExternalEnabled,'bcSetShoulderExternal(true)'),
   o('外す',!DB.trainingSettings?.shoulderExternalEnabled,'bcSetShoulderExternal(false)')
@@ -4490,6 +4509,7 @@ const BC_EXERCISE_VIDEOS={
  "インクラインダンベルカール":{id:"OUgqSjTc0Io",start:37},
  "プリーチャー・ハンマーカール（片手重量）":{id:"OUgqSjTc0Io",start:20},
  "EZバー・ライイングエクステンション":{id:"MI3UDh0UKjc"},
+ "ケーブル・フレンチプレス":{id:"VXJlecGLis8",start:29},
  "ケーブルプレスダウン":{id:"NAry9DhipJA"},
 };
 function bcExerciseVideo(name){
@@ -4513,6 +4533,7 @@ function bcGuide(){
  bcRefreshLegPlan();
  bcRefreshAbsPlan();
  bcRefreshShoulderPlan();
+ bcRefreshArmPlan();
  const root=document.getElementById('bc-mobile-guide');if(!root)return;
  const idx=bcIndex(bcViewDate),date=bcViewDate,part=BC_PARTS[idx],items=BC_WEEKLY_PLAN[idx],isToday=date===TODAY;
  const estimated=items.reduce((n,x)=>n+bcDpConfig(x.n).sets,0);
@@ -4538,6 +4559,7 @@ function bcDraw(){
  bcRefreshLegPlan();
  bcRefreshAbsPlan();
  bcRefreshShoulderPlan();
+ bcRefreshArmPlan();
  const idx=bcIndex(bcViewDate),items=BC_WEEKLY_PLAN[idx],root=document.getElementById('prog-card-inner');if(!root)return;
  // Keep calendar selection synchronized with the displayed training program.
  document.querySelectorAll('#wgrid .day').forEach(el=>el.classList.toggle('viewing',el.dataset.date===bcViewDate));
