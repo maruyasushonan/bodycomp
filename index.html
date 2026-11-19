@@ -3824,14 +3824,15 @@ const BC_LEGS_A=[
  {n:'スクワット',sets:3,reps:'87.5kg × 6〜10回・RIR2〜3',rest:'180〜240秒',extra:'初期重量87.5kgは1RM 120〜125kgを参考。動作が不安定なら減量'},
  {n:'ブルガリアンスクワット（片手重量）',sets:2,reps:'片手10kg × 8〜12回／脚・RIR2〜3',rest:'120〜180秒',extra:'暫定開始重量。左右各2セット、片手10kgずつ（合計20kg）。フォーム優先'},
  {n:'ルーマニアンデッドリフト（バーベル）',sets:2,reps:'20kg（バー込み・フォーム確認用）×8〜12回・RIR3',rest:'120〜180秒',extra:'股関節を後ろへ引くヒップヒンジ。腰背部・ハムストリングスの疲労に注意し初回は1セットでも可'},
- {n:'レッグカール（マシン重量）',sets:3,reps:'20kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'シーテッドレッグカール（座位式）。マシンの表示重量20kgは仮設定。機種差が大きいため初回に負荷を再調整'},
+ {n:'レッグエクステンション（マシン重量）',sets:2,reps:'表示15kg（暫定）×10〜15回・RIR3',rest:'直後にレッグカール（休憩なし）',extra:'脚スーパーセット B1／全2ラウンド。大腿四頭筋を狙い、反動なく膝を伸ばす。重量はマシン表示値で記録'},
+ {n:'レッグカール（マシン重量）',sets:2,reps:'表示20kg（暫定）×10〜15回・RIR2〜3',rest:'60〜90秒（次ラウンドのレッグエクステンションまで）',extra:'脚スーパーセット B2／全2ラウンド。シーテッド式を想定。重量はマシン表示値で記録。A・Bメニュー間で記録は共通'},
  {n:'カーフプレス（マシン重量）',sets:2,reps:'40kg × 10〜15回・RIR2',rest:'90〜120秒',extra:'レッグプレス／カーフプレス使用。表示40kgは仮設定で、マシン機構に応じて調整'}
 ];
 const BC_LEGS_REVISED=[...BC_LEGS_A];
 const BC_LEGS_MACHINE_B=[
  {n:'45°レッグプレス（追加プレート合計重量）',sets:3,reps:'追加プレート合計40kg（暫定・スレッド自重除外）×8〜12回・RIR3',rest:'150〜180秒',extra:'初回は無負荷から確認。左右のプレートを合計して記録。スレッド重量・摩擦は機種で異なる'},
- {n:'レッグカール（マシン重量）',sets:3,reps:'表示20kg（暫定）×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'シーテッド式。Aメニューと重量設定・履歴を共用'},
- {n:'レッグエクステンション（マシン重量）',sets:2,reps:'表示15kg（暫定）×10〜15回・RIR3',rest:'90〜120秒',extra:'大腿四頭筋を狙い、反動なく動かす。膝に痛みがある場合は中止'},
+ {n:'レッグエクステンション（マシン重量）',sets:2,reps:'表示15kg（暫定）×10〜15回・RIR3',rest:'直後にレッグカール（休憩なし）',extra:'脚スーパーセット B1／全2ラウンド。大腿四頭筋を狙い、反動なく膝を伸ばす。重量はマシン表示値で記録'},
+ {n:'レッグカール（マシン重量）',sets:2,reps:'表示20kg（暫定）×10〜15回・RIR2〜3',rest:'60〜90秒（次ラウンドのレッグエクステンションまで）',extra:'脚スーパーセット B2／全2ラウンド。シーテッド式を想定。重量はマシン表示値で記録。A・Bメニュー間で記録は共通'},
  {n:'ケーブルプルスルー（マシン重量）',sets:2,reps:'表示10kg（暫定）×10〜15回・RIR3',rest:'90〜120秒',extra:'低い滑車にロープをつけ、臀部とハムストリングスを狙う。初回は軽負荷から'},
  {n:'スタンディングカーフレイズ（追加重量）',sets:2,reps:'追加重量0kg（自重から確認）×10〜15回・RIR2〜3',rest:'90秒',extra:'立位で膝を伸ばし、かかとをゆっくり上下。加重時は追加した重量だけを記録'},
  {n:'ケーブルクランチ（マシン重量）',sets:2,reps:'表示10kg（暫定）×10〜15回・RIR3',rest:'90秒',extra:'Day4腹筋と重複するため、強い筋肉痛のある週は省略可。腰・肩が痛む場合は実施しない'}
@@ -3929,6 +3930,8 @@ if(DB.trainingSettings?.progression){
  const p=DB.trainingSettings.progression;
  if(p['ワンハンドダンベルロウ（片手重量）']?.sets===3)p['ワンハンドダンベルロウ（片手重量）'].sets=2;
  if(p['ラットプルダウン（マシン重量）']?.sets===2)p['ラットプルダウン（マシン重量）'].sets=3;
+  // 旧既定の3セットからスーパーセットの2ラウンドへ移行。その他の個別設定は保持。
+  if(p['レッグカール（マシン重量）']?.sets===3)p['レッグカール（マシン重量）'].sets=2;
 }
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
@@ -3985,7 +3988,7 @@ const BC_DEFAULT_DP={
  '片手ケーブルプレスダウン':{min:12,max:15,sets:2,step:1,rir:3,weight:5},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
  'ブルガリアンスクワット（片手重量）':{min:8,max:12,sets:2,step:2,rir:2,weight:10},
- 'レッグカール（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
+ 'レッグカール（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:2,weight:20,mode:'weight'},
  'カーフプレス（マシン重量）':{min:10,max:15,sets:2,step:5,rir:2,weight:40,mode:'weight'},
  'インクラインベンチプレス':{min:8,max:12,sets:3,step:2.5,rir:2,weight:null},
  'ノーマル懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0},
@@ -4076,7 +4079,7 @@ const BC_IMAGE_SLUGS={
  "ケーブル・チェストフライ（ミドル・片側重量）": "cable-fly",
  "スクワット": "squat",
  "ブルガリアンスクワット（片手重量）": "bulgarian-split-squat",
- "レッグカール（マシン重量）": "seated-leg-curl",
+ "レッグカール（マシン重量）": "leg-extension", // スーパーセットの2種目でサムネイル統一
  "カーフプレス（マシン重量）": "machine-calf-raise",
  "ノーマル懸垂": "pull-up",
  "プレートロード・シーテッドロー": "chest-supported-machine-row",
@@ -4103,27 +4106,10 @@ const BC_IMAGE_SLUGS={
  "プリーチャー・ハンマーカール（片手重量）": "preacher-hammer-curl",
  "ケーブルプレスダウン": "tricep-pushdown",
  "ケーブルリストカール": "cable-wrist-curl",
+ "ケーブルリバースカール": "cable-wrist-curl", // 前腕スーパーセットの2種目でサムネイル統一
  "片手ケーブルプレスダウン": "single-arm-tricep-pushdown"
 };
-function bcCableReverseCurlThumb(){
- // ケーブル式・順手の肘屈曲を示す独自の簡易サムネイル。
- return '<span class="bc-thumb" role="img" aria-label="ケーブルリバースカールのイラスト">'+
- '<svg viewBox="0 0 80 80" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
- '<rect width="80" height="80" rx="12" fill="#e7f4fa"/>'+
- '<path d="M12 9V67M6 9h12M6 67h12" fill="none" stroke="#738da2" stroke-width="3" stroke-linecap="round"/>'+
- '<rect x="8" y="30" width="8" height="14" rx="2" fill="#537389"/>'+
- '<circle cx="48" cy="17" r="9" fill="#e4a97b"/>'+
- '<path d="M43 26Q36 32 38 46L40 56H56L57 38Q56 28 52 26Z" fill="#287fb0"/>'+
- '<path d="M43 55L39 73M53 55L58 73" stroke="#263d52" stroke-width="7" stroke-linecap="round"/>'+
- '<path d="M41 33L34 45L42 49M55 33L61 44L53 49" fill="none" stroke="#e4a97b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>'+
- '<path d="M31 48L57 48" stroke="#263d52" stroke-width="4" stroke-linecap="round"/>'+
- '<path d="M15 37L31 48" stroke="#738da2" stroke-width="2" stroke-dasharray="3 2"/>'+
- '<path d="M61 49Q68 39 62 33" fill="none" stroke="#f28b39" stroke-width="2" stroke-linecap="round"/>'+
- '<path d="M59 34l4-3 2 5" fill="none" stroke="#f28b39" stroke-width="2" stroke-linejoin="round"/>'+
- '</svg></span>';
-}
 function bcExerciseThumb(name){
- if(name==='ケーブルリバースカール')return bcCableReverseCurlThumb();
  const slug=BC_IMAGE_SLUGS[name];
  const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+(name===BC_CARDIO_BIKE_NAME?'-main.webp':'-peak.webp'):'';
  return '<span class="bc-thumb"><span class="bc-thumb-fallback">🏋️</span>'+(url?'<img loading="lazy" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+'</span>';
@@ -4495,6 +4481,7 @@ const BC_EXERCISE_VIDEOS={
  "ルーマニアンデッドリフト（バーベル）":{id:"E0y3M2F9fsw"},
  "45°レッグプレス（追加プレート合計重量）":{id:"mcdJRrMCAhw"},
  "レッグエクステンション（マシン重量）":{id:"aa0Eilqwlcw"},
+ "レッグカール（マシン重量）":{id:"aa0Eilqwlcw"},
  "ノーマル懸垂":{id:"EhQeBHP7rjE"},
  "ワンハンドダンベルロウ（片手重量）":{id:"0LY1bGPPsRk"},
  "チェストサポーテッド・ダンベルロー（片手重量）":{id:"d6lBT0gOWHE",start:18},
@@ -4523,6 +4510,8 @@ function bcExerciseVideo(name){
 }
 
 function bcSupersetLabel(name){
+ if(name==='レッグエクステンション（マシン重量）')return '<div class="bc-forearm-ss">脚SS B1 · 1種目目／2ラウンド ｜ 直後にレッグカール（休憩なし）</div>';
+ if(name==='レッグカール（マシン重量）')return '<div class="bc-forearm-ss">脚SS B2 · 2種目目／2ラウンド ｜ 終了後60〜90秒休憩</div>';
  if(name==='ケーブルリストカール')return '<div class="bc-forearm-ss">SS A1 · 前腕スーパーセット 1/2 ｜ 終了後は休まずA2へ</div>';
  if(name==='ケーブルリバースカール')return '<div class="bc-forearm-ss">SS A2 · 前腕スーパーセット 2/2 ｜ 終了後60〜90秒休憩</div>';
  return '';
