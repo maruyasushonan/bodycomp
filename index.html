@@ -3871,6 +3871,7 @@ function bcSetShoulderExternal(on){DB.trainingSettings.shoulderExternalEnabled=o
 const BC_ARMS_REVISED=[
  {n:'EZバーカール',sets:3,reps:'バー込み25kg（暫定）・8〜12回',rest:'120秒',extra:'RIR2〜3。腰の反動を使わず実施'},
  {n:'インクラインダンベルカール',sets:2,reps:'片手8kg（暫定）・10〜15回',rest:'90〜120秒',extra:'肩に痛みがある場合は中止'},
+ {n:'プリーチャー・ハンマーカール（片手重量）',sets:2,reps:'片手8kg（暫定）・10〜15回・RIR2〜3',rest:'90〜120秒',extra:'プリーチャーベンチに上腕を固定し、ダンベルをニュートラルグリップで持つ。上腕筋・腕橈骨筋を重視。重量は片手分を記録'},
  {n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'},
  {n:'ケーブルプレスダウン',sets:3,reps:'表示20kg（暫定）・10〜15回',rest:'90〜120秒',extra:'RIR2〜3。マシン表示重量は実機ごとに再調整'}
 ];
@@ -3950,6 +3951,7 @@ const BC_DEFAULT_DP={
  'EZバーカール':{min:8,max:12,sets:3,step:2.5,rir:2,weight:25},
  'EZバー・ライイングエクステンション':{min:8,max:12,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'インクラインダンベルカール':{min:10,max:15,sets:2,step:2,rir:3,weight:8},
+ 'プリーチャー・ハンマーカール（片手重量）':{min:10,max:15,sets:2,step:2,rir:3,weight:8,mode:'weight'},
  'ケーブルプレスダウン':{min:10,max:15,sets:3,step:2.5,rir:2,weight:20,mode:'weight'},
  '片手ケーブルプレスダウン':{min:12,max:15,sets:2,step:1,rir:3,weight:5},
  'スクワット':{min:6,max:10,sets:3,step:2.5,rir:2,weight:87.5},
@@ -4067,6 +4069,7 @@ const BC_IMAGE_SLUGS={
  "EZバーカール": "ez-bar-curl",
  "EZバー・ライイングエクステンション": "ez-bar-lying-tricep-extension",
  "インクラインダンベルカール": "incline-db-curl",
+ "プリーチャー・ハンマーカール（片手重量）": "preacher-hammer-curl",
  "ケーブルプレスダウン": "tricep-pushdown",
  "片手ケーブルプレスダウン": "single-arm-tricep-pushdown"
 };
@@ -4077,6 +4080,13 @@ function bcExerciseThumb(name){
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "プリーチャー・ハンマーカール（片手重量）":{
+  "target":"上腕筋・腕橈骨筋が主働。上腕二頭筋も補助する。",
+  "setup":"プリーチャーベンチのパッドに上腕を密着させ、ダンベルを手のひらが向き合うニュートラルグリップで握る。シートとパッドの高さを調整し、片手重量を記録する。",
+  "motion":"上腕の位置と手首の角度を保ち、肘を曲げてダンベルを持ち上げる。上部で一瞬静止し、下降局面をゆっくりコントロールする。",
+  "caution":"反動を使わず、最下部で肘を勢いよく完全伸展させない。肘や肩に違和感が出る場合は負荷・可動域を調整する。初期8kgは暫定値。"
+ },
+
  "インクラインバーベルベンチプレス":{
   "target":"大胸筋鎖骨部（上部）・三角筋前部・上腕三頭筋。",
   "setup":"インクラインベンチを約30°に設定。肩甲骨と胸郭を安定させ、肩に負担の少ない握り幅を選ぶ。バー込みの総重量を記録する。",
