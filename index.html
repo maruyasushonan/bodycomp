@@ -3707,6 +3707,10 @@ function launchConfetti() {
 .bc-logrow input{width:66px;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 5px;color:var(--text);font-size:13px}
 .bc-smallbtn{border:0;border-radius:8px;padding:9px 11px;background:var(--blue);color:#fff;font-weight:650;font-size:12px;cursor:pointer}
 .bc-saved{font-size:11px;color:var(--green);line-height:1.7;margin-top:5px}
+.bc-short-video{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;margin:7px 0 2px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--blue);font-size:12px;font-weight:700;text-decoration:none}
+.bc-short-video:hover{border-color:var(--blue);background:rgba(0,122,255,.07)}
+.bc-short-video:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
 .bc-cycle-info{font-size:12px;line-height:1.6;color:var(--text2)}
 .bc-trendbox{margin:12px 0 18px}
 .bc-trendtitle{font-size:12px;font-weight:700;margin-bottom:6px}
@@ -4384,6 +4388,44 @@ function bcExerciseSwitches(day,i){
  return '';
 }
 
+// ユーザー指定のトレーニング直前確認用ショート動画（指定開始秒を優先）。
+const BC_EXERCISE_VIDEOS={
+ "バーベルベンチプレス":{id:"AKlPDkU2G5A"},
+ "30°インクラインダンベルプレス（片手重量）":{id:"vLaF-17chCk"},
+ "ケーブル・チェストフライ（ミドル・片側重量）":{id:"t9H_y-cX1pU"},
+ "加重クランチ（ベンチ）":{id:"bANiOqDD7cw"},
+ "シーテッド・リバースクランチ":{id:"bANiOqDD7cw"},
+ "アブローラー（膝コロ）":{id:"bANiOqDD7cw"},
+ "フロアクランチ（マット・自重）":{id:"bANiOqDD7cw"},
+ "リバースクランチ（マット）":{id:"bANiOqDD7cw"},
+ "スクワット":{id:"v585xCrfn20"},
+ "45°レッグプレス（追加プレート合計重量）":{id:"mcdJRrMCAhw"},
+ "レッグエクステンション（マシン重量）":{id:"aa0Eilqwlcw"},
+ "ノーマル懸垂":{id:"EhQeBHP7rjE"},
+ "ワンハンドダンベルロウ（片手重量）":{id:"0LY1bGPPsRk"},
+ "チェストサポーテッド・ダンベルロー（片手重量）":{id:"d6lBT0gOWHE",start:18},
+ "シーテッドロー（ケーブル・マシン重量）":{id:"ACY99A0gLJE",start:40},
+ "ラテラルレイズマシン":{id:"7snq53o3iy8"},
+ "ケーブル・ラテラルレイズ":{id:"7snq53o3iy8"},
+ "リアデルトマシン":{id:"7snq53o3iy8"},
+ "チェストサポート・リアレイズ":{id:"7snq53o3iy8"},
+ "ケーブル・リアレイズ":{id:"7snq53o3iy8"},
+ "オーバーヘッドプレス":{id:"7snq53o3iy8"},
+ "EZバーカール":{id:"fOgnS18q1lI"},
+ "インクラインダンベルカール":{id:"OUgqSjTc0Io",start:37},
+ "EZバー・ライイングエクステンション":{id:"MI3UDh0UKjc"},
+ "ケーブルプレスダウン":{id:"NAry9DhipJA"},
+};
+function bcExerciseVideo(name){
+ const item=BC_EXERCISE_VIDEOS[name];
+ if(!item)return '';
+ const start=item.start||0;
+ // Shortsページでは開始位置が無視されることがあるため、指定秒数がある場合はYouTube通常URLのtパラメーターを使用。
+ const url='https://www.youtube.com/watch?v='+encodeURIComponent(item.id)+(start?'&t='+start+'s':'');
+ const time=start?'<span style="font-weight:500;opacity:.8">（'+Math.floor(start/60)+':'+String(start%60).padStart(2,'0')+'から）</span>':'';
+ return '<a class="bc-short-video" href="'+url+'" target="_blank" rel="noopener noreferrer" aria-label="'+bcEscape(name)+'のショート動画をYouTubeで開く'+(start?'（'+start+'秒から）':'')+'">▶ フォーム動画'+time+' <span aria-hidden="true">↗</span></a>';
+}
+
 function bcGuide(){
  BC_CHEST_REVISED[1]=bcChestIncline();BC_CHEST_REVISED[2]=bcChestFly();
  bcRefreshBackPlan();
@@ -4402,7 +4444,7 @@ function bcGuide(){
   const weight=c.mode==='machine'?'マシン依存':c.mode==='bodyweight'?'自重':c.weight!==null&&c.weight!==undefined?c.weight+'kg':previous?previous.weight+'kg（前回実績）':'未設定';
   const grade=bcDpResult(e.n,date);
   const next=grade?(grade.pain?'痛みあり：増量しない':grade.ready?(c.mode==='bodyweight'?'自重を維持、必要なら加重を検討':c.mode==='machine'?'同じマシンで次回の設定を調整':'次回は+'+c.step+'kgを検討'):'次回は同重量を基本に回数の向上を狙う'):'RIR 2〜3を目安に初回の負荷を調整';
-  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
+  html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
  if(bcHasCardio(date))html+=bcCardioCard(date,true);
   html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kg／バーベル総重量50kgを暫定候補とし、肩の反応を確認して適宜減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
@@ -4424,7 +4466,7 @@ function bcDraw(){
  html+=`<div class="bc-daystrip">${BC_PARTS.map((p,i)=>`<button class="bc-day-chip ${i===idx?'on':''}" onclick="bcChoose(${i})">${(i===5||i===6)?'休':'D'+(i+1)}<br>${p}</button>`).join('')}</div>`;
  if(!today)html+=`<button class="bc-smallbtn" style="margin-bottom:12px" onclick="bcViewDate=TODAY;bcDraw()">今日に戻る</button>`;
  items.forEach((e,i)=>{const id=idx+'-'+i;const logs=DB.trainingLogs.filter(x=>x.date===bcViewDate&&x.exercise===e.n);const last=DB.trainingLogs.filter(x=>x.exercise===e.n&&x.date<bcViewDate).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,1)[0];
- html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
+ html+=`<div class="bc-ex"><div class="bc-ex-head" style="display:flex;align-items:center;gap:10px">${bcExerciseThumb(e.n)}<span>${i+1}. ${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcFormTarget(e.n)}<div class="bc-cycle-info">原型：${e.sets}セット · ${bcEscape(e.reps)}</div><div class="bc-note">休憩 ${bcEscape(e.rest)}${e.extra?'｜'+bcEscape(e.extra):''}</div>${last?`<div class="bc-note">前回：${last.weight}kg × ${last.reps}回 / RIR ${last.rir}</div>`:''}${bcFormDetails(e.n)}${bcDpCard(e.n,id,bcViewDate)}<div class="bc-saved">${logs.length?logs.map((l,j)=>`✓ ${j+1}セット目 ${l.weight}kg × ${l.reps}回 / RIR ${l.rir}${l.pain>0?' / 痛み'+l.pain:''}`).join('<br>'):'まだ記録なし'}</div>`;
  if(today&&idx!==5&&idx!==6)html+=`<div class="bc-logrow"><label class="bc-note">重量 <input id="bc-w-${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="kg"></label><label class="bc-note">回数 <input id="bc-r-${id}" type="number" min="0" step="1" inputmode="numeric" placeholder="回"></label><label class="bc-note">RIR <input id="bc-i-${id}" type="number" min="0" max="10" value="2"></label><label class="bc-note">痛み <input id="bc-p-${id}" type="number" min="0" max="10" value="0"></label><button class="bc-smallbtn" onclick="bcAdd('${id}')">＋記録</button></div>`;
  html+='</div>';});
  if(bcHasCardio(bcViewDate))html+=bcCardioCard(bcViewDate,false);
