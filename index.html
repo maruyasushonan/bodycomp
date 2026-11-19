@@ -3791,12 +3791,13 @@ if(!Array.isArray(DB.trainingLogs)) DB.trainingLogs=[];
 if(!Array.isArray(DB.cardioLogs))DB.cardioLogs=[];
 // 旧プレートロード選択は新バーベル選択に読み替え、旧記録・旧種目別設定は削除しない。
 if(!DB.trainingSettings)DB.trainingSettings={};
-if(DB.trainingSettings.chestInclineChoice!=='dumbbell'&&DB.trainingSettings.chestInclineChoice!=='barbell')DB.trainingSettings.chestInclineChoice='barbell';
+if(DB.trainingSettings.chestInclineChoice==='barbell'||DB.trainingSettings.chestInclineChoice==='machine')DB.trainingSettings.chestInclineChoice='smith';
+if(DB.trainingSettings.chestInclineChoice!=='dumbbell'&&DB.trainingSettings.chestInclineChoice!=='smith')DB.trainingSettings.chestInclineChoice='smith';
 // 旧6分割で保存した種目IDを名称から新順序へ対応付ける（履歴の日付・部位は保持）。
 const BC_CHEST_INCLINE_DB={n:'30°インクラインダンベルプレス（片手重量）',sets:2,reps:'ベンチ角度30°・片手24kgは仮の開始候補・8〜12回',rest:'120〜150秒',extra:'無痛の場合だけ実施。片手重量を記録しRIR2〜3を優先'};
-const BC_CHEST_INCLINE_BARBELL={n:'インクラインバーベルベンチプレス',sets:2,reps:'バー込み50kg（暫定）・6〜10回・RIR2〜3',rest:'150〜180秒',extra:'角度30°前後。肩に痛みのないグリップ・可動域を優先。バーを含む総重量を記録。初回は軽い重量で確認し、必要なら補助者やセーフティを使用'};
-function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='dumbbell'?BC_CHEST_INCLINE_DB:BC_CHEST_INCLINE_BARBELL;}
-function bcSetChestIncline(choice){if(choice!=='dumbbell'&&choice!=='barbell')return;if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
+const BC_CHEST_INCLINE_SMITH={n:'インクラインスミスマシンプレス',sets:2,reps:'開始重量は実機で設定・6〜10回・RIR2〜3',rest:'150〜180秒',extra:'ベンチ角度は約30°。バーの実効重量が機種で異なるため、初期重量は未設定。使用マシンの表示値・プレート重量を一貫した方法で記録'};
+function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='dumbbell'?BC_CHEST_INCLINE_DB:BC_CHEST_INCLINE_SMITH;}
+function bcSetChestIncline(choice){if(choice!=='dumbbell'&&choice!=='smith')return;if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
 const BC_CHEST_PEC_DECK={n:'ペックデック（無痛時のみ）',sets:2,reps:'マシン表示15kg（暫定）・12〜15回・無痛の可動域のみ',rest:'90〜120秒',extra:'肩の水平内転痛の既往あり。軽い設定から確認し、痛む場合は省略。マシン表示重量は実機で調整'};
 const BC_CHEST_CABLE_FLY={n:'ケーブル・チェストフライ（ミドル・片側重量）',sets:2,reps:'片側2.5kg（暫定）・12〜15回・RIR3',rest:'90〜120秒',extra:'胸の高さで水平内転を行うケーブルフライ。大胸筋全体を刺激するが内側だけを独立して鍛える種目ではない。右肩に痛みが出れば中止'};
 function bcChestFly(){return DB.trainingSettings?.chestFlyChoice==='cable'?BC_CHEST_CABLE_FLY:BC_CHEST_PEC_DECK;}
@@ -3927,7 +3928,8 @@ const BC_DEFAULT_DP={
  'ケーブルクランチ（マシン重量）':{min:10,max:15,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
  'バーベルベンチプレス':{min:5,max:8,sets:3,step:2.5,rir:2,weight:80},
  '30°インクラインダンベルプレス（片手重量）':{min:8,max:12,sets:2,step:2,rir:3,weight:24},
- 'インクラインバーベルベンチプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:50,mode:'weight'},
+ 'インクラインバーベルベンチプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:50,mode:'weight'}, // 旧記録用に保持
+ 'インクラインスミスマシンプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:null,mode:'weight'},
  'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
  'ペックデック（無痛時のみ）':{min:12,max:15,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'ケーブル・チェストフライ（ミドル・片側重量）':{min:12,max:15,sets:2,step:1.25,rir:3,weight:2.5,mode:'weight'},
@@ -4039,7 +4041,8 @@ const BC_IMAGE_SLUGS={
  "ケーブルクランチ（マシン重量）": "cable-crunch",
  "バーベルベンチプレス": "bench-press",
  "30°インクラインダンベルプレス（片手重量）": "incline-db-press",
- "インクラインバーベルベンチプレス": "incline-bench-press",
+ "インクラインバーベルベンチプレス": "incline-bench-press", // 旧履歴用
+ "インクラインスミスマシンプレス": "smith-machine-incline-bench-press",
  "プレートロード・インクラインプレス": "chest-press-machine",
  "ペックデック（無痛時のみ）": "pec-deck",
  "エアロバイク（20分）": "stationary-bike",
@@ -4080,6 +4083,13 @@ function bcExerciseThumb(name){
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "インクラインスミスマシンプレス":{
+  "target":"大胸筋鎖骨部（上部）・三角筋前部・上腕三頭筋。",
+  "setup":"スミスマシンにインクラインベンチを約30°に置き、バーが胸上部へ下りる位置に調整する。肩と手首に負担の少ない握り幅を選び、セーフティ位置を確認する。",
+  "motion":"肘と手首の位置を安定させ、バーを胸上部に向けてゆっくり下ろす。マシンの軌道に沿って押し上げる。",
+  "caution":"スミスバーの実効重量は機種ごとに違うため、旧バーベルの50kgをそのまま初期重量にしない。マシンに合わない軌道や肩の痛みを感じた場合は設定を見直す。"
+ },
+
  "プリーチャー・ハンマーカール（片手重量）":{
   "target":"上腕筋・腕橈骨筋が主働。上腕二頭筋も補助する。",
   "setup":"プリーチャーベンチのパッドに上腕を密着させ、ダンベルを手のひらが向き合うニュートラルグリップで握る。シートとパッドの高さを調整し、片手重量を記録する。",
@@ -4356,7 +4366,7 @@ function bcExerciseSwitches(day,i){
  const o=(label,selected,action)=>({label,selected,action});
  if(day===0&&i===1)return bcCardSwitch('器具',[
   o('30°DB',DB.trainingSettings?.chestInclineChoice==='dumbbell',"bcSetChestIncline('dumbbell')"),
-  o('BB',DB.trainingSettings?.chestInclineChoice!=='dumbbell',"bcSetChestIncline('barbell')")
+  o('スミス',DB.trainingSettings?.chestInclineChoice!=='dumbbell',"bcSetChestIncline('smith')")
  ]);
  if(day===0&&i===2)return bcCardSwitch('フライ',[
   o('ペックデック',DB.trainingSettings?.chestFlyChoice!=='cable',"bcSetChestFly('pecdeck')"),
@@ -4402,6 +4412,7 @@ function bcExerciseSwitches(day,i){
 const BC_EXERCISE_VIDEOS={
  "バーベルベンチプレス":{id:"AKlPDkU2G5A"},
  "30°インクラインダンベルプレス（片手重量）":{id:"vLaF-17chCk"},
+ "インクラインスミスマシンプレス":{id:"eJxMWzB0DxQ",start:40},
  "ケーブル・チェストフライ（ミドル・片側重量）":{id:"t9H_y-cX1pU"},
  "加重クランチ（ベンチ）":{id:"bANiOqDD7cw"},
  "シーテッド・リバースクランチ":{id:"bANiOqDD7cw"},
@@ -4458,7 +4469,7 @@ function bcGuide(){
   html+=`<div class="bc-mobile-ex"><div class="top"><span class="number">${String(i+1).padStart(2,'0')}</span>${bcExerciseThumb(e.n)}<span class="exname">${bcEscape(e.n)}</span></div>${bcExerciseSwitches(idx,i)}${bcExerciseVideo(e.n)}${bcFormTarget(e.n)}<div class="bc-prescription"><div class="metric"><div class="val">${bcEscape(weight)}</div><div class="lbl">使用重量${custom?'（自分用）':''}</div></div><div class="metric"><div class="val">${c.min}〜${c.max}回</div><div class="lbl">目標回数</div></div><div class="metric"><div class="val">${c.sets}セット</div><div class="lbl">実施セット</div></div></div><div class="hint"><div class="hint-primary"><span>休憩 ${bcEscape(e.rest)}</span><span>目標 RIR ${c.rir}以上</span></div><div class="hint-secondary">${bcEscape(next)}</div></div>${bcFormDetails(e.n)}${bcDpCard(e.n,idx+'-'+i,date)}</div>`;
  });
  if(bcHasCardio(date))html+=bcCardioCard(date,true);
-  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kg／バーベル総重量50kgを暫定候補とし、肩の反応を確認して適宜減量してください。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
+  html+=`<div class="bc-dp-note">※胸の日のバーベルベンチプレスは80kg×5回×3セットの無痛実績から設定しました。インクラインはダンベル片手24kgを暫定候補とし、スミスマシンは実機のバー重量が異なるため初期重量を未設定にしています。初期重量が未設定のその他の種目は、あなたが実際に安全に行える重量をまだ確認していません。Shuruさんの使用重量を自動で適用していません。記録はノートで行い、必要なときだけ設定欄を編集してください。</div>`;
  html+='<div class="bc-note" style="margin-top:12px">運動画像：<a href="https://repdb.co/" target="_blank" rel="noopener noreferrer">Exercise data by RepDB (repdb.co)</a>。画像が取得できない種目はアイコンを表示します。</div>';
  root.innerHTML=html;
 }
