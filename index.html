@@ -656,7 +656,8 @@ const save = () => { DB._ts=Date.now(); localStorage.setItem('bc_db',JSON.string
 const SB_URL='https://lsmghehgpqizbvthgxil.supabase.co';
 const SB_KEY='sb_publishable_6sryVP8-c2kYE6mdXuEHOg_ayabv7X7';
 const SB_ID='taka';
-const sbH=()=>({'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY});
+// sb_publishable_ はJWTではない。PostgRESTへは apikey のみ送信する（Authorization に設定しない）。
+const sbH=()=>({'Content-Type':'application/json','apikey':SB_KEY});
 let _syncT=null;
 function setSyncDot(s){
   const el=document.getElementById('sync-dot');
@@ -3964,9 +3965,9 @@ async function bcImportPcWeights(){
   try{
    res=await fetch(SB_URL+'/rest/v1/sync_data?id=eq.'+encodeURIComponent(SB_ID)+'&select=payload',{headers:sbH(),cache:'no-store'});
   }catch(networkError){
-   throw new Error('クラウドに接続できません。同期サーバーの停止・ネットワーク・ブラウザのブロック設定を確認してください（通信エラー）。');
+   throw new Error('同期サーバーへ接続できません。ブラウザのネットワークタブでSupabaseへの通信がブロックされていないか、Supabaseプロジェクトが稼働しているか確認してください。');
   }
-  if(!res.ok)throw new Error('同期サーバーからHTTP '+res.status+'が返されました。権限設定やサーバー状態を確認してください。');
+  if(!res.ok)throw new Error('同期サーバーからHTTP '+res.status+'が返されました。'+(res.status===401||res.status===403?'APIキーまたはテーブルのアクセス権限を確認してください。':'サーバーの状態を確認してください。'));
   const type=res.headers.get('content-type')||'';
   if(!type.includes('json'))throw new Error('同期サーバーからJSON以外の応答が返りました。ページを再読み込みし、再度お試しください。');
   const rows=await res.json();
