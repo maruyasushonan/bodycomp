@@ -3843,7 +3843,7 @@ function bcRefreshLegPlan(){const chosen=bcLegChoice()==='B'?BC_LEGS_MACHINE_B.m
 function bcSetLegMenu(v){if(v!=='A'&&v!=='B')return;DB.trainingSettings.legMenuChoice=v;bcRefreshLegPlan();save();bcDraw();}
 const BC_ABS_NORMAL=[
  {n:'加重クランチ（ベンチ）',sets:3,reps:'8〜15回・RIR2／プレート重量を記録（最初は自重で確認）',rest:'90〜120秒',extra:'肋骨を骨盤へ近づけるように上体を丸める。重りは胸の前。初回は2セットまでを目安にする'},
- {n:'シーテッド・リバースクランチ',sets:2,reps:'自重×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'ベンチに座って上体を少し後傾。膝を引き寄せる際に骨盤を軽く後傾させる。初回は1セットから'},
+ {n:'レッグレイズ',sets:2,reps:'自重×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'仰向けで脚をゆっくり上げ下げ。腰を反りすぎず骨盤を安定させる。必要に応じて膝を軽く曲げる'},
  {n:'アブローラー（膝コロ）',sets:1,reps:'自重×6〜10回・RIR3〜4／短い可動域から',rest:'120秒',extra:'以前の強い腹痛と肩痛を考慮。初回は省略も可。腹部・腰・肩に痛みがあれば実施しない'}
 ];
 const BC_ABS_MAT=[
@@ -3890,6 +3890,15 @@ if(DB.trainingSettings?.progression?.[BC_OLD_INCLINE_NAME]){
  bcInclineRenamed=true;
 }
 if(bcInclineRenamed) save();
+// 種目名変更前の記録と個別設定は引き継ぐ。
+let bcLegRaiseRenamed=false;
+DB.trainingLogs.forEach(log=>{if(log.exercise==='シーテッド・リバースクランチ'){log.exercise='レッグレイズ';bcLegRaiseRenamed=true;}});
+if(DB.trainingSettings?.progression?.['シーテッド・リバースクランチ']){
+ if(!DB.trainingSettings.progression['レッグレイズ'])DB.trainingSettings.progression['レッグレイズ']=DB.trainingSettings.progression['シーテッド・リバースクランチ'];
+ delete DB.trainingSettings.progression['シーテッド・リバースクランチ'];
+ bcLegRaiseRenamed=true;
+}
+if(bcLegRaiseRenamed)save();
 // 旧腹筋種目の履歴は保持し、新メニューと同じスロットに誤表示しない。
 DB.trainingLogs.forEach(log=>{
  if(log.exercise==='アブドミナルクランチ（マシン重量）' || log.exercise==='パロフプレス（ケーブル重量）'){
@@ -3940,7 +3949,7 @@ const BC_DEFAULT_DP={
  'チェストサポーテッド・ダンベルロー（片手重量）':{min:8,max:12,sets:3,step:2,rir:3,weight:10,mode:'weight'},
  'アブドミナルクランチ（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:15,mode:'weight'},
  '加重クランチ（ベンチ）':{min:8,max:15,sets:3,step:1.25,rir:2,weight:0,mode:'weight'},
- 'シーテッド・リバースクランチ':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
+ 'レッグレイズ':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
  'アブローラー（膝コロ）':{min:6,max:10,sets:1,step:0,rir:4,weight:0,mode:'bodyweight'},
  'パロフプレス（ケーブル重量）':{min:10,max:12,sets:1,step:1,rir:3,weight:5,mode:'weight'},
  'ラテラルレイズマシン':{min:12,max:20,sets:3,step:1,rir:3,weight:5},
@@ -3965,7 +3974,7 @@ const BC_DEFAULT_DP={
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
 };
 const BC_MACHINE_NAMES=new Set(['ケーブルプレスダウン','ワンハンドケーブルプル']);
-const BC_BODYWEIGHT_NAMES=new Set(['シーテッド・リバースクランチ','アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
+const BC_BODYWEIGHT_NAMES=new Set(['レッグレイズ','アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
  try{
@@ -4058,7 +4067,7 @@ const BC_IMAGE_SLUGS={
  "ワンハンドダンベルロウ（片手重量）": "single-arm-db-row",
  "ラットプルダウン（マシン重量）": "lat-pulldown",
  "加重クランチ（ベンチ）": "weighted-wall-crunch",
- "シーテッド・リバースクランチ": "bench-leg-pull-in",
+ "レッグレイズ": "lying-leg-raise",
  "アブドミナルクランチ（マシン重量）": "machine-seated-crunch",
  "アブローラー（膝コロ）": "ab-wheel-rollout",
  "パロフプレス（ケーブル重量）": "cable-pallof-press",
@@ -4261,11 +4270,11 @@ const BC_FORM_GUIDES={
   "motion": "股関節から大きく起き上がるのではなく、肋骨を骨盤へ近づけるように体幹をゆっくり丸める。戻す局面も制御する。",
   "caution": "首を引っ張らない。勢いでシットアップにしない。首の後ろへ重りを置かない。腹部・腰に鋭い痛みがあれば中止。初回は少ないセット数・軽負荷で始める。"
  },
- "シーテッド・リバースクランチ": {
-  "target": "腹直筋全体（骨盤後傾を意識）。股関節屈筋群も働く。腹直筋下部だけを独立して鍛える種目ではない。",
-  "setup": "ベンチの端寄りに座り、上体をやや後傾させる。必要に応じて身体の横でベンチを軽く支える。膝をやや曲げる。",
-  "motion": "膝を胸に近づける際に骨盤を軽く後傾させ、下腹部を丸める意識で引き寄せる。戻すときは脚を前へ伸ばしすぎず、反動なく制御する。",
-  "caution": "脚を勢いよく前後に振るだけにしない。腰を強く反らさず、股関節前面や腹部に痛みがあれば中止。手で支えて右肩が痛む場合は省略する。"
+ "レッグレイズ": {
+  "target": "腹直筋・股関節屈筋群。骨盤と腰椎の安定に腹筋群が働く。",
+  "setup": "マットまたはフラットベンチに仰向けになり、脚を揃える。腰が反らない位置を保ち、必要に応じて膝を軽く曲げる。",
+  "motion": "反動を使わず脚を持ち上げ、ゆっくり下ろす。腰が反り始める手前で切り返し、体幹を安定させる。",
+  "caution": "脚を床まで無理に下ろさず、腰が反る場合は可動域を短くする。股関節や腰に違和感がある場合は負荷を調整する。"
  },
  "アブドミナルクランチ（マシン重量）": {
   "target": "腹直筋（体幹屈曲）",
@@ -4414,9 +4423,9 @@ const BC_EXERCISE_VIDEOS={
  "30°インクラインダンベルプレス（片手重量）":{id:"vLaF-17chCk"},
  "インクラインスミスマシンプレス":{id:"eJxMWzB0DxQ",start:40},
  "ケーブル・チェストフライ（ミドル・片側重量）":{id:"t9H_y-cX1pU"},
- "加重クランチ（ベンチ）":{id:"bANiOqDD7cw"},
- "シーテッド・リバースクランチ":{id:"bANiOqDD7cw"},
- "アブローラー（膝コロ）":{id:"bANiOqDD7cw"},
+ "加重クランチ（ベンチ）":{id:"bANiOqDD7cw",start:18},
+ "レッグレイズ":{id:"bANiOqDD7cw",start:28},
+ "アブローラー（膝コロ）":{id:"bANiOqDD7cw",start:38},
  "フロアクランチ（マット・自重）":{id:"bANiOqDD7cw"},
  "リバースクランチ（マット）":{id:"bANiOqDD7cw"},
  "スクワット":{id:"v585xCrfn20"},
