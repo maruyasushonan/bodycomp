@@ -3866,10 +3866,11 @@ function bcShoulderLat(){return DB.trainingSettings?.shoulderLatChoice==='machin
 const BC_SHOULDER_REAR_C={n:'ケーブル・リアレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒',extra:'肩をすくめず、三角筋後部を意識して引く'};
 function bcShoulderRear(){const c=DB.trainingSettings?.shoulderRearChoice;return c==='machine'?BC_SHOULDER_REAR_A:c==='dumbbell'?BC_SHOULDER_REAR_B:BC_SHOULDER_REAR_C;}
 function bcSetShoulderChoice(part,v){DB.trainingSettings[part==='lat'?'shoulderLatChoice':'shoulderRearChoice']=v;save();bcDraw();}
+const BC_SHOULDER_SMITH={n:'スミスマシンショルダープレス',sets:2,reps:'実機で初期重量を設定・8〜12回・RIR3',rest:'150〜180秒',extra:'三角筋前部と上腕三頭筋を中心に刺激。バーの実効重量は機種ごとに異なる。肩に痛みがあるときは実施せず、セーフティを調整して無痛の軌道を優先'};
 const BC_SHOULDER_OHP={n:'オーバーヘッドプレス',sets:2,reps:'重量未設定・6〜10回／RIR3',rest:'150〜180秒',extra:'肩に痛みがある間は実施しない。無痛での耐性確認後のみ'};
 const BC_SHOULDER_EXTERNAL={n:'ケーブル外旋',sets:2,reps:'表示1kg（暫定）・12〜15回/側',rest:'60〜90秒',extra:'任意のコンディショニング種目。軽負荷・無痛の場合のみ'};
-const BC_SHOULDERS_REVISED=[bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP];
-function bcRefreshShoulderPlan(){BC_SHOULDERS_REVISED.splice(0,BC_SHOULDERS_REVISED.length,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...(DB.trainingSettings?.shoulderExternalEnabled?[BC_SHOULDER_EXTERNAL]:[]));}
+const BC_SHOULDERS_REVISED=[BC_SHOULDER_SMITH,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP];
+function bcRefreshShoulderPlan(){BC_SHOULDERS_REVISED.splice(0,BC_SHOULDERS_REVISED.length,BC_SHOULDER_SMITH,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...(DB.trainingSettings?.shoulderExternalEnabled?[BC_SHOULDER_EXTERNAL]:[]));}
 function bcSetShoulderExternal(on){DB.trainingSettings.shoulderExternalEnabled=on;save();bcDraw();}
 const BC_ARM_LYING_EXTENSION={n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'};
 const BC_ARM_CABLE_FRENCH={n:'ケーブル・フレンチプレス',sets:2,reps:'マシン表示重量は実機で設定・10〜15回・RIR2〜3',rest:'90〜120秒',extra:'ケーブル上腕三頭筋オーバーヘッドエクステンション。上部滑車のロープを背にして頭上へ伸ばす。重量はマシン表示値で記録'};
@@ -3987,6 +3988,7 @@ const BC_DEFAULT_DP={
  'ケーブル外旋':{min:12,max:15,sets:2,step:0.5,rir:4,weight:1},
  'ケーブル・リアレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2.5},
  'オーバーヘッドプレス':{min:6,max:10,sets:2,step:2.5,rir:3,weight:null},
+ 'スミスマシンショルダープレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:null,mode:'weight'},
  'EZバーカール':{min:8,max:12,sets:3,step:2.5,rir:2,weight:25},
  'EZバー・ライイングエクステンション':{min:8,max:12,sets:2,step:2.5,rir:3,weight:15,mode:'weight'},
  'ケーブル・フレンチプレス':{min:10,max:15,sets:2,step:2.5,rir:3,weight:null,mode:'machine'},
@@ -4120,13 +4122,38 @@ const BC_IMAGE_SLUGS={
  "ケーブルリバースカール": "cable-wrist-curl", // 前腕スーパーセットの2種目でサムネイル統一
  "片手ケーブルプレスダウン": "single-arm-tricep-pushdown"
 };
+function bcSmithShoulderThumb(){
+ // インラインSVGでネットワークに依存せずサムネイルを表示する。
+ return '<span class="bc-thumb" role="img" aria-label="スミスマシンショルダープレスのイラスト">'+
+ '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">'+
+ '<rect width="100" height="100" rx="12" fill="#eaf3fa"/>'+
+ '<path d="M15 10V91M85 10V91M11 10H89M11 91H89" fill="none" stroke="#728ca0" stroke-width="4" stroke-linecap="round"/>'+
+ '<rect x="9" y="41" width="12" height="7" rx="1.5" fill="#41657f"/>'+
+ '<rect x="79" y="41" width="12" height="7" rx="1.5" fill="#41657f"/>'+
+ '<path d="M12 45H88" stroke="#304e62" stroke-width="5" stroke-linecap="round"/>'+
+ '<circle cx="51" cy="35" r="9" fill="#dda37c"/>'+
+ '<path d="M42 46Q34 51 38 67L41 80H63L64 57Q63 49 58 46Z" fill="#297eaf"/>'+
+ '<path d="M41 51L29 47L25 45M60 51L72 47L76 45" fill="none" stroke="#dda37c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>'+
+ '<path d="M44 79L41 91M59 79L63 91" stroke="#3c5369" stroke-width="7" stroke-linecap="round"/>'+
+ '<path d="M34 75H68M37 75V92M65 75V92" stroke="#65717e" stroke-width="5" stroke-linecap="round"/>'+
+ '<path d="M96 57V29M92 34L96 29L100 34" stroke="#e67e36" stroke-width="3" fill="none" stroke-linejoin="round"/>'+
+ '</svg></span>';
+}
 function bcExerciseThumb(name){
+ if(name==='スミスマシンショルダープレス')return bcSmithShoulderThumb();
  const slug=BC_IMAGE_SLUGS[name];
  const url=slug?'https://raw.githubusercontent.com/RepDB/exercise-dataset/main/images/flat/'+encodeURIComponent(slug)+(name===BC_CARDIO_BIKE_NAME?'-main.webp':'-peak.webp'):'';
  return '<span class="bc-thumb"><span class="bc-thumb-fallback">🏋️</span>'+(url?'<img loading="lazy" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+'</span>';
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "スミスマシンショルダープレス":{
+  "target":"三角筋前部・中部（補助）・上腕三頭筋。肩中部の孤立種目ではない。",
+  "setup":"スミスマシン内に背もたれつきベンチを配置し、バーが顔の前を通るよう座面位置と背もたれ角度を調整する。セーフティを設定し、軽負荷で軌道確認する。バー実効重量は機種で異なる。",
+  "motion":"肩と手首が無理のない握り幅でバーを押し上げ、肘を伸ばす。下ろす際は肩の痛みが出ない深さで止め、反動を使わない。",
+  "caution":"固定軌道が肩に合わない場合は中止。バーを首の後ろに下ろさない。前方挙上や頭上動作に痛みがある場合は実施しない。同日のOHPとは刺激が重なるため両方を無理に行わない。"
+ },
+
  "ケーブル・フレンチプレス":{
   "target":"上腕三頭筋（特に長頭を伸張位で刺激）。外側頭・内側頭も働く。",
   "setup":"上部滑車にロープを取り付け、マシンに背を向けてロープを頭の後ろで握る。片脚を前に出して体幹を安定させ、肘を上方に向ける。重量はケーブルマシンの表示値で記録する。",
@@ -4456,11 +4483,11 @@ function bcExerciseSwitches(day,i){
   o('マシン',DB.trainingSettings?.backChestRowChoice!=='dumbbell',"bcSetBackChestRow('machine')"),
   o('DB',DB.trainingSettings?.backChestRowChoice==='dumbbell',"bcSetBackChestRow('dumbbell')")
  ]);
- if(day===3&&i===0)return bcCardSwitch('サイド',[
+ if(day===3&&i===1)return bcCardSwitch('サイド',[
   o('ケーブル',DB.trainingSettings?.shoulderLatChoice!=='machine',"bcSetShoulderChoice('lat','cable')"),
   o('マシン',DB.trainingSettings?.shoulderLatChoice==='machine',"bcSetShoulderChoice('lat','machine')")
  ]);
- if(day===3&&i===1)return bcCardSwitch('リア',[
+ if(day===3&&i===2)return bcCardSwitch('リア',[
   o('ケーブル',!['machine','dumbbell'].includes(DB.trainingSettings?.shoulderRearChoice),"bcSetShoulderChoice('rear','cable')"),
   o('マシン',DB.trainingSettings?.shoulderRearChoice==='machine',"bcSetShoulderChoice('rear','machine')"),
   o('胸支持DB',DB.trainingSettings?.shoulderRearChoice==='dumbbell',"bcSetShoulderChoice('rear','dumbbell')")
@@ -4469,7 +4496,7 @@ function bcExerciseSwitches(day,i){
   o('EZバー',DB.trainingSettings?.armExtensionChoice!=='cable',"bcSetArmExtension('ez')"),
   o('ケーブル',DB.trainingSettings?.armExtensionChoice==='cable',"bcSetArmExtension('cable')")
  ]);
- if(day===3&&i===2)return bcCardSwitch('任意：外旋',[
+ if(day===3&&i===3)return bcCardSwitch('任意：外旋',[
   o('追加',!!DB.trainingSettings?.shoulderExternalEnabled,'bcSetShoulderExternal(true)'),
   o('外す',!DB.trainingSettings?.shoulderExternalEnabled,'bcSetShoulderExternal(false)')
  ]);
