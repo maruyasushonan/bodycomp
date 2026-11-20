@@ -3859,7 +3859,7 @@ function bcRefreshAbsPlan(){BC_ABS_REVISED.splice(0,BC_ABS_REVISED.length,...(bc
 function bcSetAbsMenu(v){if(v!=='normal'&&v!=='mat')return;DB.trainingSettings.absMenuChoice=v;bcRefreshAbsPlan();save();bcDraw();}
 
 const BC_SHOULDER_LAT_A={n:'ラテラルレイズマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
-const BC_SHOULDER_LAT_B={n:'ケーブル・ラテラルレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒'};
+const BC_SHOULDER_LAT_B={n:'ケーブル・サイドレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒'};
 const BC_SHOULDER_REAR_A={n:'リアデルトマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
 const BC_SHOULDER_REAR_B={n:'チェストサポート・リアレイズ',sets:3,reps:'片手2kg（暫定）・12〜20回',rest:'90〜120秒'};
 function bcShoulderLat(){return DB.trainingSettings?.shoulderLatChoice==='machine'?BC_SHOULDER_LAT_A:BC_SHOULDER_LAT_B;}
@@ -3943,6 +3943,17 @@ if(DB.trainingSettings?.progression){
   // 旧既定の3セットからスーパーセットの2ラウンドへ移行。その他の個別設定は保持。
   if(p['レッグカール（マシン重量）']?.sets===3)p['レッグカール（マシン重量）'].sets=2;
 }
+// ケーブル・ラテラルレイズの名称を更新し、種目別設定と履歴を引き継ぐ。
+const BC_SHOULDER_SIDE_OLD='ケーブル・ラテラルレイズ';
+const BC_SHOULDER_SIDE_NEW='ケーブル・サイドレイズ';
+let bcShoulderSideRenamed=false;
+DB.trainingLogs.forEach(log=>{if(log.exercise===BC_SHOULDER_SIDE_OLD){log.exercise=BC_SHOULDER_SIDE_NEW;bcShoulderSideRenamed=true;}});
+if(DB.trainingSettings?.progression?.[BC_SHOULDER_SIDE_OLD]){
+ if(!DB.trainingSettings.progression[BC_SHOULDER_SIDE_NEW])DB.trainingSettings.progression[BC_SHOULDER_SIDE_NEW]=DB.trainingSettings.progression[BC_SHOULDER_SIDE_OLD];
+ delete DB.trainingSettings.progression[BC_SHOULDER_SIDE_OLD];
+ bcShoulderSideRenamed=true;
+}
+if(bcShoulderSideRenamed)save();
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
 DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const isOldThursdayAbs=(new Date(log.date+'T12:00:00').getDay()===4)&&([...BC_ABS_NORMAL,...BC_ABS_MAT].some(e=>e.n===log.exercise));if(isOldThursdayAbs)return;const isBeforeShoulderArmShift=log.date<'2026-11-19'&&([...BC_SHOULDERS_REVISED,BC_ARMS_REVISED,BC_SHOULDER_EXTERNAL].some(e=>e.n===log.exercise));if(isBeforeShoulderArmShift)return;const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
@@ -3982,7 +3993,7 @@ const BC_DEFAULT_DP={
  'アブローラー（膝コロ）':{min:6,max:10,sets:1,step:0,rir:4,weight:0,mode:'bodyweight'},
  'パロフプレス（ケーブル重量）':{min:10,max:12,sets:1,step:1,rir:3,weight:5,mode:'weight'},
  'ラテラルレイズマシン':{min:12,max:20,sets:3,step:1,rir:3,weight:5},
- 'ケーブル・ラテラルレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2.5},
+ 'ケーブル・サイドレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2.5},
  'リアデルトマシン':{min:12,max:20,sets:3,step:1,rir:3,weight:5},
  'チェストサポート・リアレイズ':{min:12,max:20,sets:3,step:1,rir:3,weight:2},
  'ケーブル外旋':{min:12,max:15,sets:2,step:0.5,rir:4,weight:1},
@@ -4106,7 +4117,7 @@ const BC_IMAGE_SLUGS={
  "アブローラー（膝コロ）": "ab-wheel-rollout",
  "パロフプレス（ケーブル重量）": "cable-pallof-press",
  "ラテラルレイズマシン": "plate-loaded-lateral-raise",
- "ケーブル・ラテラルレイズ": "cable-lateral-raise",
+ "ケーブル・サイドレイズ": "cable-lateral-raise",
  "リアデルトマシン": "machine-reverse-fly",
  "ケーブル・リアレイズ": "cable-reverse-fly",
  "オーバーヘッドプレス": "ohp",
@@ -4376,7 +4387,7 @@ const BC_FORM_GUIDES={
   "motion": "肘・上腕を身体の横方向へ無痛で上げ、ゆっくり下げる。",
   "caution": "肩の痛みがある日は実施しない。勢いや首のすくめ動作を避ける。"
  },
- "ケーブル・ラテラルレイズ": {
+ "ケーブル・サイドレイズ": {
   "target": "三角筋中部（肩の横幅）",
   "setup": "滑車を低めに調整し、片手でケーブルを持ち姿勢を安定。",
   "motion": "肩甲面寄りの無痛な軌道で腕を外へ上げる。",
@@ -4525,12 +4536,12 @@ const BC_EXERCISE_VIDEOS={
  "チェストサポーテッド・ダンベルロー（片手重量）":{id:"d6lBT0gOWHE",start:18},
  "シーテッドロー（ケーブル・マシン重量）":{id:"ACY99A0gLJE",start:40},
  "ラテラルレイズマシン":{id:"7snq53o3iy8"},
- "ケーブル・ラテラルレイズ":{id:"7snq53o3iy8"},
+ "ケーブル・サイドレイズ":{id:"7snq53o3iy8",start:3},
  "リアデルトマシン":{id:"7snq53o3iy8"},
  "チェストサポート・リアレイズ":{id:"7snq53o3iy8"},
- "ケーブル・リアレイズ":{id:"7snq53o3iy8"},
+ "ケーブル・リアレイズ":{id:"7snq53o3iy8",start:24},
  "スミスマシンショルダープレス":{id:"-4Ku7Ljn_V0",start:94},
- "オーバーヘッドプレス":{id:"7snq53o3iy8"},
+ "オーバーヘッドプレス":{id:"7snq53o3iy8",start:44},
  "EZバーカール":{id:"fOgnS18q1lI"},
  "インクラインダンベルカール":{id:"OUgqSjTc0Io",start:37},
  "プリーチャー・ハンマーカール（片手重量）":{id:"OUgqSjTc0Io",start:20},
