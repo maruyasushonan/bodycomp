@@ -3844,7 +3844,7 @@ function bcSetLegHinge(v){if(v!=='back'&&v!=='cable')return;DB.trainingSettings.
 function bcRefreshLegPlan(){const chosen=bcLegChoice()==='B'?BC_LEGS_MACHINE_B.map(e=>e.n==='ケーブルプルスルー（マシン重量）'&&bcLegHingeChoice()==='back'?BC_LEG_HINGE_BACK:e):BC_LEGS_A;BC_LEGS_REVISED.splice(0,BC_LEGS_REVISED.length,...chosen);}
 function bcSetLegMenu(v){if(v!=='A'&&v!=='B')return;DB.trainingSettings.legMenuChoice=v;bcRefreshLegPlan();save();bcDraw();}
 const BC_ABS_NORMAL=[
- {n:'加重クランチ（ベンチ）',sets:3,reps:'8〜15回・RIR2／プレート重量を記録（最初は自重で確認）',rest:'90〜120秒',extra:'肋骨を骨盤へ近づけるように上体を丸める。重りは胸の前。初回は2セットまでを目安にする'},
+ {n:'クランチマシン',sets:3,reps:'マシン表示重量は実機で設定・8〜15回・RIR2',rest:'90〜120秒',extra:'座面・パッドを調整し、肋骨を骨盤に近づけるよう体幹を丸める。重量は使用機種の表示値を記録。プレート加重クランチの10kgとは別基準'},
  {n:'シーテッド・レッグレイズ',sets:2,reps:'自重×10〜15回・RIR2〜3',rest:'90〜120秒',extra:'仰向けで脚をゆっくり上げ下げ。腰を反りすぎず骨盤を安定させる。必要に応じて膝を軽く曲げる'},
  {n:'アブローラー（膝コロ）',sets:1,reps:'自重×6〜10回・RIR3〜4／短い可動域から',rest:'120秒',extra:'以前の強い腹痛と肩痛を考慮。初回は省略も可。腹部・腰・肩に痛みがあれば実施しない'}
 ];
@@ -3915,6 +3915,15 @@ if(DB.trainingSettings?.progression){
  }
 }
 if(bcLegRaiseRenamed)save();
+// 加重クランチ（ベンチ）→クランチマシン：旧ログと重量は別種目として保持する。
+if(DB.trainingSettings?.progression?.['加重クランチ（ベンチ）']&&!DB.trainingSettings.progression['クランチマシン']){
+ const old=DB.trainingSettings.progression['加重クランチ（ベンチ）'];
+ DB.trainingSettings.progression['クランチマシン']={
+  min:old.min||8,max:old.max||15,sets:old.sets||3,rir:old.rir??2,
+  step:2.5,weight:null,mode:'machine'
+ };
+ save();
+}
 // 旧腹筋種目の履歴は保持し、新メニューと同じスロットに誤表示しない。
 DB.trainingLogs.forEach(log=>{
  if(log.exercise==='アブドミナルクランチ（マシン重量）' || log.exercise==='パロフプレス（ケーブル重量）'){
@@ -3966,7 +3975,8 @@ const BC_DEFAULT_DP={
  'ラットプルダウン（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:35,mode:'weight'},
  'チェストサポーテッド・ダンベルロー（片手重量）':{min:8,max:12,sets:3,step:2,rir:3,weight:10,mode:'weight'},
  'アブドミナルクランチ（マシン重量）':{min:10,max:15,sets:3,step:2.5,rir:2,weight:15,mode:'weight'},
- '加重クランチ（ベンチ）':{min:8,max:15,sets:3,step:1.25,rir:2,weight:0,mode:'weight'},
+ '加重クランチ（ベンチ）':{min:8,max:15,sets:3,step:1.25,rir:2,weight:0,mode:'weight'}, // 旧履歴・設定の保全
+ 'クランチマシン':{min:8,max:15,sets:3,step:2.5,rir:2,weight:null,mode:'machine'},
  'シーテッド・レッグレイズ':{min:10,max:15,sets:2,step:0,rir:3,weight:0,mode:'bodyweight'},
  'アブローラー（膝コロ）':{min:6,max:10,sets:1,step:0,rir:4,weight:0,mode:'bodyweight'},
  'パロフプレス（ケーブル重量）':{min:10,max:12,sets:1,step:1,rir:3,weight:5,mode:'weight'},
@@ -4087,7 +4097,8 @@ const BC_IMAGE_SLUGS={
  "チェストサポーテッド・ダンベルロー（片手重量）": "chest-supported-db-row",
  "ワンハンドダンベルロウ（片手重量）": "single-arm-db-row",
  "ラットプルダウン（マシン重量）": "lat-pulldown",
- "加重クランチ（ベンチ）": "weighted-wall-crunch",
+ "加重クランチ（ベンチ）": "weighted-wall-crunch", // 旧データ用
+ "クランチマシン": "machine-seated-crunch",
  "シーテッド・レッグレイズ": "bench-leg-pull-in",
  "アブドミナルクランチ（マシン重量）": "machine-seated-crunch",
  "アブローラー（膝コロ）": "ab-wheel-rollout",
@@ -4308,11 +4319,11 @@ const BC_FORM_GUIDES={
   "motion": "胸の上部へ向けて肘を下げ、反動を使わず戻す。",
   "caution": "首の後ろへ引かない。過度な後傾や肩の痛みが出る握り幅を避ける。"
  },
- "加重クランチ（ベンチ）": {
-  "target": "腹直筋全体。体幹屈曲による腹筋の筋肥大を重視（上部だけに限定されない）。",
-  "setup": "フラット／デクラインいずれのベンチでも上体を安全に支持。初回は自重で動作確認し、加重する場合はプレートを胸の前で保持。重量はプレート分を記録する。",
-  "motion": "股関節から大きく起き上がるのではなく、肋骨を骨盤へ近づけるように体幹をゆっくり丸める。戻す局面も制御する。",
-  "caution": "首を引っ張らない。勢いでシットアップにしない。首の後ろへ重りを置かない。腹部・腰に鋭い痛みがあれば中止。初回は少ないセット数・軽負荷で始める。"
+ "クランチマシン": {
+  "target": "腹直筋全体（体幹屈曲）。機種によって補助筋の関与は変わる。",
+  "setup": "クランチマシンの座面とパッドを身長に合わせて調整する。骨盤・脚を安定させ、腹部が無理なく丸められる設定にする。マシンの表示重量を記録する。",
+  "motion": "反動を使わず肋骨を骨盤に近づけるよう体幹を丸め、腹直筋の収縮を感じながらゆっくり戻す。",
+  "caution": "股関節だけで引かず、首や肩に力を入れすぎない。腰や腹部に痛みがあれば中止。従来のプレート10kgとマシン表示重量は直接比較できない。"
  },
  "シーテッド・レッグレイズ": {
   "target": "腹直筋・股関節屈筋群。骨盤と腰椎の安定に腹筋群が働く。",
@@ -4471,7 +4482,7 @@ const BC_EXERCISE_VIDEOS={
  "30°インクラインダンベルプレス（片手重量）":{id:"vLaF-17chCk"},
  "インクラインスミスマシンプレス":{id:"eJxMWzB0DxQ",start:40},
  "ケーブル・チェストフライ（ミドル・片側重量）":{id:"t9H_y-cX1pU"},
- "加重クランチ（ベンチ）":{id:"bANiOqDD7cw",start:18},
+ "加重クランチ（ベンチ）":{id:"bANiOqDD7cw",start:18}, // 旧種目用に保持。クランチマシンには流用しない
  "シーテッド・レッグレイズ":{id:"bANiOqDD7cw",start:28},
  "アブローラー（膝コロ）":{id:"bANiOqDD7cw",start:38},
  "フロアクランチ（マット・自重）":{id:"bANiOqDD7cw"},
