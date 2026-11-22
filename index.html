@@ -3753,7 +3753,7 @@ function launchConfetti() {
 <script>
 // BodyComp v2: 2026-11-01から6日循環。原型と実績は別データで保持。
 const BC_START='2026-11-02';
-const BC_PARTS=['胸＋腹筋','脚','背中','肩','腕','休養','休養'];
+const BC_PARTS=['胸','脚','背中','肩＋腹筋','腕','休養','休養'];
 const BC_SOURCE='月:胸＋腹筋／火:脚／水:背中＋バイク20分／木:肩＋バイク20分／金:腕＋バイク20分／土日:休養。バイクは筋トレ後・中強度で実施。';
 const BC_PLAN=[
 [{n:'インクラインベンチプレス',sets:7,reps:'106kg×4〜5回×2 / 86kg×8〜10回×3 / 56kg×限界×2',rest:'120秒（最後60秒）',extra:'準備：56kg×12回×2'},
@@ -3855,8 +3855,8 @@ const BC_ABS_MAT=[
 ];
 const BC_ABS_REVISED=[...BC_ABS_NORMAL];
 function bcAbsMenuChoice(){return DB.trainingSettings?.absMenuChoice==='mat'?'mat':'normal';}
-function bcRefreshAbsPlan(){BC_ABS_REVISED.splice(0,BC_ABS_REVISED.length,...(bcAbsMenuChoice()==='mat'?BC_ABS_MAT:BC_ABS_NORMAL));BC_CHEST_REVISED.splice(3,BC_CHEST_REVISED.length-3,...BC_ABS_REVISED);}
-function bcSetAbsMenu(v){if(v!=='normal'&&v!=='mat')return;DB.trainingSettings.absMenuChoice=v;bcRefreshAbsPlan();save();bcDraw();}
+function bcRefreshAbsPlan(){BC_ABS_REVISED.splice(0,BC_ABS_REVISED.length,...(bcAbsMenuChoice()==='mat'?BC_ABS_MAT:BC_ABS_NORMAL));}
+function bcSetAbsMenu(v){if(v!=='normal'&&v!=='mat')return;DB.trainingSettings.absMenuChoice=v;bcRefreshAbsPlan();bcRefreshShoulderPlan();save();bcDraw();}
 
 const BC_SHOULDER_LAT_A={n:'ラテラルレイズマシン',sets:3,reps:'表示5kg（暫定）・12〜20回',rest:'90〜120秒'};
 const BC_SHOULDER_LAT_B={n:'ケーブル・サイドレイズ',sets:3,reps:'表示2.5kg（暫定）・12〜20回/腕',rest:'90〜120秒'};
@@ -3869,8 +3869,8 @@ function bcSetShoulderChoice(part,v){DB.trainingSettings[part==='lat'?'shoulderL
 const BC_SHOULDER_SMITH={n:'スミスマシンショルダープレス',sets:2,reps:'実機で初期重量を設定・8〜12回・RIR3',rest:'150〜180秒',extra:'三角筋前部と上腕三頭筋を中心に刺激。バーの実効重量は機種ごとに異なる。肩に痛みがあるときは実施せず、セーフティを調整して無痛の軌道を優先'};
 const BC_SHOULDER_OHP={n:'オーバーヘッドプレス',sets:2,reps:'重量未設定・6〜10回／RIR3',rest:'150〜180秒',extra:'肩に痛みがある間は実施しない。無痛での耐性確認後のみ'};
 const BC_SHOULDER_EXTERNAL={n:'ケーブル外旋',sets:2,reps:'表示1kg（暫定）・12〜15回/側',rest:'60〜90秒',extra:'任意のコンディショニング種目。軽負荷・無痛の場合のみ'};
-const BC_SHOULDERS_REVISED=[BC_SHOULDER_SMITH,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP];
-function bcRefreshShoulderPlan(){BC_SHOULDERS_REVISED.splice(0,BC_SHOULDERS_REVISED.length,BC_SHOULDER_SMITH,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...(DB.trainingSettings?.shoulderExternalEnabled?[BC_SHOULDER_EXTERNAL]:[]));}
+const BC_SHOULDERS_REVISED=[BC_SHOULDER_SMITH,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...BC_ABS_REVISED];
+function bcRefreshShoulderPlan(){BC_SHOULDERS_REVISED.splice(0,BC_SHOULDERS_REVISED.length,BC_SHOULDER_SMITH,bcShoulderLat(),bcShoulderRear(),BC_SHOULDER_OHP,...(DB.trainingSettings?.shoulderExternalEnabled?[BC_SHOULDER_EXTERNAL]:[]),...BC_ABS_REVISED);}
 function bcSetShoulderExternal(on){DB.trainingSettings.shoulderExternalEnabled=on;save();bcDraw();}
 const BC_ARM_LYING_EXTENSION={n:'EZバー・ライイングエクステンション',sets:2,reps:'EZバー込み15kg（安全確認用の暫定値）・8〜12回',rest:'120〜150秒',extra:'初回はバーのみで無痛確認。肩・肘が痛む場合は実施せず、プレスダウンに変更'};
 const BC_ARM_CABLE_FRENCH={n:'ケーブル・フレンチプレス',sets:2,reps:'マシン表示重量は実機で設定・10〜15回・RIR2〜3',rest:'90〜120秒',extra:'ケーブル上腕三頭筋オーバーヘッドエクステンション。上部滑車のロープを背にして頭上へ伸ばす。重量はマシン表示値で記録'};
@@ -3888,6 +3888,7 @@ const BC_ARMS_REVISED=[
 ];
 bcRefreshLegPlan();
 bcRefreshAbsPlan();
+bcRefreshShoulderPlan();
 bcRefreshArmPlan();
 const BC_WEEKLY_PLAN=[BC_CHEST_REVISED,BC_LEGS_REVISED,BC_BACK_REVISED,BC_SHOULDERS_REVISED,BC_ARMS_REVISED,[],[]];
 // 旧名称の記録・個別重量設定を新名称へ引き継ぐ（ほかの種目は不変更）。
@@ -3956,7 +3957,7 @@ if(DB.trainingSettings?.progression?.[BC_SHOULDER_SIDE_OLD]){
 if(bcShoulderSideRenamed)save();
 const bcExerciseIndex=new Map(BC_WEEKLY_PLAN.flatMap((day,di)=>day.map((e,ei)=>[e.n,di+'-'+ei])));
 let bcMigrated=false;
-DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const isOldThursdayAbs=(new Date(log.date+'T12:00:00').getDay()===4)&&([...BC_ABS_NORMAL,...BC_ABS_MAT].some(e=>e.n===log.exercise));if(isOldThursdayAbs)return;const isBeforeShoulderArmShift=log.date<'2026-11-19'&&([...BC_SHOULDERS_REVISED,BC_ARMS_REVISED,BC_SHOULDER_EXTERNAL].some(e=>e.n===log.exercise));if(isBeforeShoulderArmShift)return;const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
+DB.trainingLogs.forEach(log=>{if(log.exercise&&bcExerciseIndex.has(log.exercise)){const isAbs=[...BC_ABS_NORMAL,...BC_ABS_MAT].some(e=>e.n===log.exercise);if(isAbs&&log.date<'2026-11-23')return;const isBeforeShoulderArmShift=log.date<'2026-11-19'&&([...BC_SHOULDERS_REVISED,BC_ARMS_REVISED,BC_SHOULDER_EXTERNAL].some(e=>e.n===log.exercise));if(isBeforeShoulderArmShift)return;const next=bcExerciseIndex.get(log.exercise);if(log.exerciseId!==next){log.exerciseId=next;bcMigrated=true;}}});
 if(bcMigrated) save();
 if(!DB.trainingSettings) DB.trainingSettings={};
 // 1RM data are confirmed one-repetition maximums, not RIR=1 single reps.
@@ -4493,7 +4494,7 @@ function bcExerciseSwitches(day,i){
   o('ペックデック',DB.trainingSettings?.chestFlyChoice!=='cable',"bcSetChestFly('pecdeck')"),
   o('ケーブル',DB.trainingSettings?.chestFlyChoice==='cable',"bcSetChestFly('cable')")
  ]);
- if(day===0&&i===3)return bcCardSwitch('腹筋メニュー',[
+ if(day===3&&i===BC_SHOULDERS_REVISED.length-BC_ABS_REVISED.length)return bcCardSwitch('腹筋メニュー',[
   o('通常',bcAbsMenuChoice()==='normal',"bcSetAbsMenu('normal')"),
   o('マット',bcAbsMenuChoice()==='mat',"bcSetAbsMenu('mat')")
  ]);
