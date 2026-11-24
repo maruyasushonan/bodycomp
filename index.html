@@ -3801,6 +3801,9 @@ const BC_CHEST_INCLINE_SMITH={n:'インクラインスミスマシンプレス',
 function bcChestIncline(){return DB.trainingSettings?.chestInclineChoice==='dumbbell'?BC_CHEST_INCLINE_DB:BC_CHEST_INCLINE_SMITH;}
 function bcSetChestIncline(choice){if(!['dumbbell','smith'].includes(choice))return;DB.trainingSettings.chestInclineChoice=choice;save();bcDraw();}
 const BC_CHEST_DIPS={n:'ディップス',sets:3,reps:'自重・6〜12回・RIR2〜3',rest:'120〜180秒',extra:'胸を狙う前傾フォーム。肩前部に違和感が出る場合は中止'};
+const BC_CHEST_INCLINE_PUSHUP={n:'インクライン・プッシュアップ',sets:2,reps:'12〜20回・RIR1〜2',rest:'90〜120秒',extra:'ベンチに手を置き、足は床。20回が余裕なら手を置く高さを下げる。肩に痛みが出る場合は中止'};
+function bcChestSecond(){return DB.trainingSettings?.chestSecondChoice==='pushup'?BC_CHEST_INCLINE_PUSHUP:BC_CHEST_DIPS;}
+function bcSetChestSecond(choice){if(!['dips','pushup'].includes(choice))return;if(!DB.trainingSettings)DB.trainingSettings={};DB.trainingSettings.chestSecondChoice=choice;save();bcDraw();}
 const BC_CHEST_FLAT_DB={n:'フラットダンベルプレス（片手重量）',sets:3,reps:'片手重量・8〜12回・RIR2〜3',rest:'120〜180秒',extra:'肩甲骨を安定させ、無痛の可動域で行う'};
 const BC_CHEST_FLAT_SMITH={n:'スミスマシンバーベルプレス',sets:3,reps:'6〜10回・RIR2〜3',rest:'150〜180秒',extra:'水平ベンチ。固定軌道が肩に合わない場合は中止し、セーフティを設定'};
 function bcChestFlat(){return DB.trainingSettings?.chestFlatChoice==='smith'?BC_CHEST_FLAT_SMITH:BC_CHEST_FLAT_DB;}
@@ -3809,8 +3812,8 @@ const BC_CHEST_PEC_DECK={n:'ペックデック（無痛時のみ）',sets:2,reps
 const BC_CHEST_DB_FLY={n:'ダンベルフライ（片手重量）',sets:2,reps:'片手重量・10〜15回・RIR3',rest:'90〜120秒',extra:'肘を軽く曲げ、肩に強いストレッチをかけすぎない'};
 function bcChestFly(){return DB.trainingSettings?.chestFlyChoice==='dumbbell'?BC_CHEST_DB_FLY:BC_CHEST_PEC_DECK;}
 function bcSetChestFly(choice){if(!['pecdeck','dumbbell'].includes(choice))return;DB.trainingSettings.chestFlyChoice=choice;save();bcDraw();}
-const BC_CHEST_REVISED=[bcChestIncline(),BC_CHEST_DIPS,bcChestFlat(),bcChestFly()];
-function bcRefreshChestPlan(){BC_CHEST_REVISED.splice(0,BC_CHEST_REVISED.length,bcChestIncline(),BC_CHEST_DIPS,bcChestFlat(),bcChestFly());}
+const BC_CHEST_REVISED=[bcChestIncline(),bcChestSecond(),bcChestFlat(),bcChestFly()];
+function bcRefreshChestPlan(){BC_CHEST_REVISED.splice(0,BC_CHEST_REVISED.length,bcChestIncline(),bcChestSecond(),bcChestFlat(),bcChestFly());}
 const BC_BACK_ROW_MACHINE={n:'プレートロード・シーテッドロー',sets:3,reps:'片側プレート10kg（暫定）・8〜12回・RIR2〜3',rest:'120〜180秒',extra:'チェストサポーテッドロー。片側プレート重量を記録し、胸をパッドに固定。上背部狙いでは肘をやや開く（無痛の範囲）'};
 const BC_BACK_ROW_DB={n:'ワンハンドダンベルロウ（片手重量）',sets:2,reps:'片手20kg（暫定）・8〜12回／側・RIR2〜3',rest:'120〜180秒',extra:'広背筋狙いで肘を腰方向へ。反対側の手をベンチで支持し、前日のRDLによる腰の疲労を考慮'};
 const BC_BACK_PULLUP={n:'ノーマル懸垂',sets:3,reps:'自重・6〜12回・RIR2（12回を余裕で超える場合は加重を検討）',rest:'120〜180秒',extra:'広背筋・大円筋。肩に痛みのない握り幅／軌道を使用'};
@@ -3984,6 +3987,7 @@ const BC_DEFAULT_DP={
  'インクラインスミスマシンプレス':{min:6,max:10,sets:3,step:2.5,rir:3,weight:null,mode:'weight'},
  'プレートロード・インクラインプレス':{min:8,max:12,sets:2,step:2.5,rir:3,weight:10,mode:'weight'},
  'ディップス':{min:6,max:12,sets:3,step:0,rir:3,weight:0,mode:'bodyweight'},
+ 'インクライン・プッシュアップ':{min:12,max:20,sets:2,step:0,rir:2,weight:0,mode:'bodyweight'},
  'フラットダンベルプレス（片手重量）':{min:8,max:12,sets:3,step:2,rir:3,weight:null,mode:'weight'},
  'スミスマシンバーベルプレス':{min:6,max:10,sets:3,step:2.5,rir:3,weight:null,mode:'weight'},
  'ダンベルフライ（片手重量）':{min:10,max:15,sets:2,step:2,rir:3,weight:null,mode:'weight'},
@@ -4026,7 +4030,7 @@ const BC_DEFAULT_DP={
  'ワイド懸垂':{min:6,max:12,sets:3,step:1.25,rir:2,weight:0}
 };
 const BC_MACHINE_NAMES=new Set(['ケーブルプレスダウン','ワンハンドケーブルプル']);
-const BC_BODYWEIGHT_NAMES=new Set(['シーテッド・レッグレイズ','アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
+const BC_BODYWEIGHT_NAMES=new Set(['シーテッド・レッグレイズ','アブローラー（膝コロ）','ノーマル懸垂','ワイド懸垂','ジーザス懸垂','ディップス','インクライン・プッシュアップ','ノルディックハムカール','アブローラー','ドラゴンフラッグ','デクラインクランチEX']);
 async function bcImportPcWeights(){
  if(!confirm('クラウドに保存されている初期重量・目標設定で、この端末の同じ種目の設定を上書きします。体組成やトレーニング履歴は変更しません。続けますか？'))return;
  try{
@@ -4106,6 +4110,7 @@ const BC_IMAGE_SLUGS={
  "インクラインスミスマシンプレス": "smith-machine-incline-bench-press",
  "プレートロード・インクラインプレス": "chest-press-machine",
  "ディップス": "dips",
+ "インクライン・プッシュアップ": "incline-push-ups",
  "フラットダンベルプレス（片手重量）": "db-bench-press",
  "スミスマシンバーベルプレス": "smith-machine-bench-press",
  "ダンベルフライ（片手重量）": "db-fly",
@@ -4190,6 +4195,12 @@ function bcExerciseThumb(name){
 }
 // 種目別フォームガイド：一元管理。セット数・重量・過去の記録には影響しない。
 const BC_FORM_GUIDES={
+ "インクライン・プッシュアップ":{
+  "target":"大胸筋（胸肋部を含む）・上腕三頭筋・三角筋前部。大胸筋下部だけを孤立して鍛える種目ではない。",
+  "setup":"安定したベンチに手を置き、足は床。頭から踵まで体を一直線に保ち、手は肩幅よりやや広めを基準に調整する。",
+  "motion":"肘を適度に曲げながら胸をベンチに近づけ、反動を使わず押し返す。12〜20回を目安にRIR1〜2で実施する。",
+  "caution":"ベンチが滑らないことを確認。20回以上余裕がある場合は手の位置を低くする。右肩前部に痛みが出たら中止。"
+ },
  "スミスマシンショルダープレス":{
   "target":"三角筋前部・中部（補助）・上腕三頭筋。肩中部の孤立種目ではない。",
   "setup":"スミスマシン内に背もたれつきベンチを配置し、バーが顔の前を通るよう座面位置と背もたれ角度を調整する。セーフティを設定し、軽負荷で軌道確認する。バー実効重量は機種で異なる。",
@@ -4501,6 +4512,10 @@ function bcExerciseSwitches(day,i){
  if(day===0&&i===0)return bcCardSwitch('インクライン',[
   o('30°スミス',DB.trainingSettings?.chestInclineChoice!=='dumbbell',"bcSetChestIncline('smith')"),
   o('30°DB',DB.trainingSettings?.chestInclineChoice==='dumbbell',"bcSetChestIncline('dumbbell')")
+ ]);
+ if(day===0&&i===1)return bcCardSwitch('種目',[
+  o('ディップス',DB.trainingSettings?.chestSecondChoice!=='pushup',"bcSetChestSecond('dips')"),
+  o('インクラインPU',DB.trainingSettings?.chestSecondChoice==='pushup',"bcSetChestSecond('pushup')")
  ]);
  if(day===0&&i===2)return bcCardSwitch('フラットプレス',[
   o('DB',DB.trainingSettings?.chestFlatChoice!=='smith',"bcSetChestFlat('dumbbell')"),
